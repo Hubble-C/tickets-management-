@@ -2,7 +2,10 @@ namespace tickets_management.Enums;
 
 public enum TicketStatus
 {
-    Cancelled,
+    // Pending must be 0: a ticket is inactive until its order is paid.
+    Pending = 0,
     Available,
-    Returned
+    Used,
+    Returned,
+    Cancelled
 }
