@@ -52,4 +52,16 @@ public class TicketService : ITicketService
 
         return ServiceResponse<Ticket>.Ok(ticket, "Ticket validated.");
     }
+
+    public async Task<IReadOnlyList<Ticket>> GetByCustomerAsync(
+        int customerId, CancellationToken ct = default)
+    {
+        return await _db.Tickets
+            .Include(t => t.OrderItem)
+            .ThenInclude(oi => oi.Order)
+            .Where(t => t.OrderItem.Order.CustomerId == customerId)
+            .OrderByDescending(t => t.OrderItem.Order.CreatedAt)
+            .ThenBy(t => t.Seat)
+            .ToListAsync(ct);
+    }
 }

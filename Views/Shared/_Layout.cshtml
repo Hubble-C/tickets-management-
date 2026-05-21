@@ -24,7 +24,16 @@
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="BoxOffice" asp-action="Checkout">Box office</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="BoxOffice" asp-action="Validate">Validate</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="BoxOffice" asp-action="Sales">Sales</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Tickets" asp-action="History">My tickets</a>
                     </li>
                 </ul>
             </div>
@@ -33,6 +42,13 @@
 </header>
 <div class="container">
     <main role="main" class="pb-3">
+        @if (TempData["Flash"] is string flash)
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                @flash
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
         @RenderBody()
     </main>
 </div>

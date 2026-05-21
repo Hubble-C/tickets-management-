@@ -89,6 +89,51 @@ public class OrderService : IOrderService
         }
     }
 
+    public Task<Order?> GetByIdAsync(int orderId, CancellationToken ct = default) =>
+        _db.Orders
+            .Include(o => o.Items)
+            .ThenInclude(i => i.Tickets)
+            .FirstOrDefaultAsync(o => o.Id == orderId, ct);
+
+    public async Task<SalesReportDto> GetSalesReportAsync(CancellationToken ct = default)
+    {
+        var ordersByStatus = await _db.Orders
+            .GroupBy(o => o.Status)
+            .Select(g => new { g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.Key, x => x.Count, ct);
+
+        // Revenue and "sold" only count paid orders; a pending/cancelled order
+        // has not produced money.
+        var paidItems = _db.OrderItems.Where(i => i.Order.Status == OrderStatus.Paid);
+
+        var grossRevenue = await paidItems.SumAsync(i => (decimal?)i.Total, ct) ?? 0m;
+        var ticketsSold = await _db.Tickets
+            .CountAsync(t => t.OrderItem.Order.Status == OrderStatus.Paid, ct);
+        var ticketsUsed = await _db.Tickets.CountAsync(t => t.Status == TicketStatus.Used, ct);
+
+        var byEvent = await paidItems
+            .GroupBy(i => i.EventId)
+            .Select(g => new EventSalesDto
+            {
+                EventId = g.Key,
+                TicketsSold = g.Sum(i => i.Quantity),
+                Revenue = g.Sum(i => i.Total),
+            })
+            .OrderByDescending(e => e.Revenue)
+            .ToListAsync(ct);
+
+        return new SalesReportDto
+        {
+            TotalOrders = ordersByStatus.Values.Sum(),
+            PaidOrders = ordersByStatus.GetValueOrDefault(OrderStatus.Paid),
+            GrossRevenue = grossRevenue,
+            TicketsSold = ticketsSold,
+            TicketsUsed = ticketsUsed,
+            OrdersByStatus = ordersByStatus,
+            ByEvent = byEvent,
+        };
+    }
+
     private void AssignTicketCodes(Order order)
     {
         foreach (var ticket in order.Items.SelectMany(i => i.Tickets))

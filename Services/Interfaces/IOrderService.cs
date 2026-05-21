@@ -20,4 +20,10 @@ public interface IOrderService
 
     /// <summary>Payment rejected: Pending -> Rejected, voiding the order's tickets.</summary>
     Task<ServiceResponse<Order>> RejectAsync(int orderId, CancellationToken ct = default);
+
+    /// <summary>Loads an order with its items and tickets, or null if not found.</summary>
+    Task<Order?> GetByIdAsync(int orderId, CancellationToken ct = default);
+
+    /// <summary>Aggregated sales figures for the box-office report.</summary>
+    Task<SalesReportDto> GetSalesReportAsync(CancellationToken ct = default);
 }

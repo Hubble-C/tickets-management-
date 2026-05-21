@@ -1,0 +1,34 @@
+@model TicketValidationViewModel
+@{
+    ViewData["Title"] = "Validate ticket";
+}
+
+<h1 class="h3 mb-3">Door validation</h1>
+
+<form asp-action="Validate" method="post" class="row g-2 align-items-end mb-4" data-disable-on-submit>
+    <div class="col-auto">
+        <label asp-for="TicketCode" class="form-label">Ticket code</label>
+        <input asp-for="TicketCode" class="form-control" placeholder="TKT-XXXXX-XXXXX" autofocus />
+        <span asp-validation-for="TicketCode" class="text-danger"></span>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Validate</button>
+    </div>
+</form>
+
+@if (Model.Success.HasValue)
+{
+    <div class="alert @(Model.Success.Value ? "alert-success" : "alert-danger")" role="alert">
+        <strong>@(Model.Success.Value ? "Admitted" : "Rejected")</strong> — @Model.Message
+        @if (Model.Ticket is not null)
+        {
+            <div class="mt-1 small">
+                Seat @Model.Ticket.Seat · status @Model.Ticket.Status · event #@Model.Ticket.EventId
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

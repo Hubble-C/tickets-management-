@@ -1,0 +1,63 @@
+@model SalesReportDto
+@{
+    ViewData["Title"] = "Sales report";
+}
+
+<h1 class="h3 mb-3">Sales report</h1>
+
+<div class="row row-cols-2 row-cols-md-5 g-3 mb-4">
+    <div class="col"><div class="card text-center h-100"><div class="card-body">
+        <div class="display-6">@Model.TotalOrders</div><div class="text-muted small">Orders</div>
+    </div></div></div>
+    <div class="col"><div class="card text-center h-100"><div class="card-body">
+        <div class="display-6">@Model.PaidOrders</div><div class="text-muted small">Paid orders</div>
+    </div></div></div>
+    <div class="col"><div class="card text-center h-100"><div class="card-body">
+        <div class="display-6">@Model.GrossRevenue.ToString("C")</div><div class="text-muted small">Gross revenue</div>
+    </div></div></div>
+    <div class="col"><div class="card text-center h-100"><div class="card-body">
+        <div class="display-6">@Model.TicketsSold</div><div class="text-muted small">Tickets sold</div>
+    </div></div></div>
+    <div class="col"><div class="card text-center h-100"><div class="card-body">
+        <div class="display-6">@Model.TicketsUsed</div><div class="text-muted small">Tickets used</div>
+    </div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-5">
+        <h2 class="h5">Orders by status</h2>
+        <table class="table table-sm">
+            <thead><tr><th>Status</th><th class="text-end">Count</th></tr></thead>
+            <tbody>
+            @foreach (var entry in Model.OrdersByStatus.OrderBy(e => e.Key))
+            {
+                <tr><td>@entry.Key</td><td class="text-end">@entry.Value</td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-md-7">
+        <h2 class="h5">By event (paid only)</h2>
+        @if (Model.ByEvent.Count == 0)
+        {
+            <p class="text-muted">No paid sales yet.</p>
+        }
+        else
+        {
+            <table class="table table-sm">
+                <thead><tr><th>Event</th><th class="text-end">Tickets</th><th class="text-end">Revenue</th></tr></thead>
+                <tbody>
+                @foreach (var ev in Model.ByEvent)
+                {
+                    <tr>
+                        <td>#@ev.EventId</td>
+                        <td class="text-end">@ev.TicketsSold</td>
+                        <td class="text-end">@ev.Revenue.ToString("C")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

@@ -11,6 +11,7 @@ builder.Services.AddControllersWithViews();
 // Domain services.
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ITicketCodeGenerator, TicketCodeGenerator>();
+builder.Services.AddSingleton<IQrCodeService, QrCodeService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 

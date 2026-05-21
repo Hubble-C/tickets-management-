@@ -11,4 +11,7 @@ public interface ITicketService
     /// Cancelled/Rejected/Pending, or that were already used.
     /// </summary>
     Task<ServiceResponse<Ticket>> MarkAsUsedAsync(string ticketCode, CancellationToken ct = default);
+
+    /// <summary>All tickets belonging to a customer, newest order first, for their QR history.</summary>
+    Task<IReadOnlyList<Ticket>> GetByCustomerAsync(int customerId, CancellationToken ct = default);
 }

@@ -1,0 +1,54 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Box office — New sale";
+}
+
+<h1 class="h3 mb-3">New sale</h1>
+
+<form asp-action="Checkout" method="post" class="row g-3" data-disable-on-submit>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="col-md-4">
+        <label asp-for="CustomerId" class="form-label"></label>
+        <input asp-for="CustomerId" class="form-control" />
+        <span asp-validation-for="CustomerId" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Nit" class="form-label"></label>
+        <input asp-for="Nit" class="form-control" />
+        <span asp-validation-for="Nit" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="PaymentMethod" class="form-label"></label>
+        <select asp-for="PaymentMethod" asp-items="Html.GetEnumSelectList<TypePayment>()" class="form-select"></select>
+    </div>
+
+    <div class="col-md-3">
+        <label asp-for="EventId" class="form-label"></label>
+        <input asp-for="EventId" class="form-control" />
+        <span asp-validation-for="EventId" class="text-danger"></span>
+    </div>
+    <div class="col-md-3">
+        <label asp-for="PriceTicket" class="form-label"></label>
+        <input asp-for="PriceTicket" class="form-control" />
+        <span asp-validation-for="PriceTicket" class="text-danger"></span>
+    </div>
+    <div class="col-md-3">
+        <label asp-for="HourAt" class="form-label"></label>
+        <input asp-for="HourAt" class="form-control" type="time" />
+    </div>
+    <div class="col-md-3">
+        <label asp-for="Seats" class="form-label"></label>
+        <input asp-for="Seats" class="form-control" placeholder="A1, A2, B5" />
+        <span asp-validation-for="Seats" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Create order</button>
+        <span class="form-text ms-2">One ticket is generated per seat.</span>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
