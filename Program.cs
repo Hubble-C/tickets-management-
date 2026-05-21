@@ -1,7 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using tickets_management.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Persistence: MySQL via Pomelo. An explicit server version keeps startup
+// offline-friendly (no AutoDetect round-trip to the database at boot).
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+builder.Services.AddDbContext<MySqlDbContext>(options =>
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36))));
 
 var app = builder.Build();
 
