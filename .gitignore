@@ -1,0 +1,6 @@
+text
+bin/
+obj/
+.idea/
+*.user
+*.suo
