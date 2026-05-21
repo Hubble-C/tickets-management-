@@ -22,13 +22,4 @@ public static class TicketStateMachine
 
     public static bool CanTransition(TicketStatus from, TicketStatus to) =>
         Transitions.TryGetValue(from, out var allowed) && allowed.Contains(to);
-
-    public static void EnsureCanTransition(TicketStatus from, TicketStatus to)
-    {
-        if (!CanTransition(from, to))
-        {
-            throw new InvalidOperationException(
-                $"Illegal ticket transition: {from} -> {to}.");
-        }
-    }
 }

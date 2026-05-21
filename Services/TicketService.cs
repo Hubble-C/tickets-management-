@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using tickets_management.Data;
 using tickets_management.Enums;
@@ -25,32 +26,39 @@ public class TicketService : ITicketService
         if (string.IsNullOrWhiteSpace(ticketCode))
             return ServiceResponse<Ticket>.Fail("A ticket code is required.");
 
-        var ticket = await _db.Tickets
-            .Include(t => t.OrderItem)
-            .ThenInclude(oi => oi.Order)
-            .FirstOrDefaultAsync(t => t.TicketCode == ticketCode, ct);
+        try
+        {
+            var ticket = await _db.Tickets
+                .Include(t => t.OrderItem)
+                .ThenInclude(oi => oi.Order)
+                .FirstOrDefaultAsync(t => t.TicketCode == ticketCode, ct);
 
-        if (ticket is null)
-            return ServiceResponse<Ticket>.Fail("Ticket not found.");
+            if (ticket is null)
+                return ServiceResponse<Ticket>.Fail("Ticket not found.");
 
-        // The Reto: a ticket can only be consumed while its order is paid.
-        var orderStatus = ticket.OrderItem.Order.Status;
-        if (orderStatus != OrderStatus.Paid)
-            return ServiceResponse<Ticket>.Fail(
-                $"Ticket cannot be used: its order is {orderStatus}, not Paid.");
+            // A ticket may only be consumed while its order is paid.
+            var orderStatus = ticket.OrderItem.Order.Status;
+            if (orderStatus != OrderStatus.Paid)
+                return ServiceResponse<Ticket>.Fail(
+                    $"Ticket cannot be used: its order is {orderStatus}, not Paid.");
 
-        if (ticket.Status == TicketStatus.Used)
-            return ServiceResponse<Ticket>.Fail("Ticket has already been used.");
+            if (ticket.Status == TicketStatus.Used)
+                return ServiceResponse<Ticket>.Fail("Ticket has already been used.");
 
-        if (!TicketStateMachine.CanTransition(ticket.Status, TicketStatus.Used))
-            return ServiceResponse<Ticket>.Fail(
-                $"Ticket cannot be used from state {ticket.Status}.");
+            if (!TicketStateMachine.CanTransition(ticket.Status, TicketStatus.Used))
+                return ServiceResponse<Ticket>.Fail(
+                    $"Ticket cannot be used from state {ticket.Status}.");
 
-        ticket.Status = TicketStatus.Used;
-        ticket.UpdatedAt = _clock.GetUtcNow().UtcDateTime;
-        await _db.SaveChangesAsync(ct);
+            ticket.Status = TicketStatus.Used;
+            ticket.UpdatedAt = _clock.GetUtcNow().UtcDateTime;
+            await _db.SaveChangesAsync(ct);
 
-        return ServiceResponse<Ticket>.Ok(ticket, "Ticket validated.");
+            return ServiceResponse<Ticket>.Ok(ticket, "Ticket validated.");
+        }
+        catch (Exception ex) when (ex is DbException or DbUpdateException)
+        {
+            return ServiceResponse<Ticket>.Fail($"Could not validate the ticket: {ex.Message}");
+        }
     }
 
     public async Task<IReadOnlyList<Ticket>> GetByCustomerAsync(

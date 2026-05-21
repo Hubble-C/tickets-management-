@@ -2,8 +2,6 @@ using tickets_management.Enums;
 
 namespace tickets_management.Models;
 
-
-//Models para relacionar las bases de datos
 public class Order : BaseEntity
 {
     public string Nit { get; set; } = string.Empty;

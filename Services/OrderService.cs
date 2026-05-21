@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using tickets_management.Data;
@@ -72,8 +73,9 @@ public class OrderService : IOrderService
 
         _db.Orders.Add(order);
 
-        // The DB unique index is the source of truth for uniqueness; if a freshly
-        // minted code happens to collide we regenerate every code and retry.
+        // The DB unique index is the source of truth for uniqueness; on the rare
+        // collision we regenerate every code and retry, giving up after a cap so a
+        // pathological case fails cleanly instead of throwing or looping forever.
         for (var attempt = 1; ; attempt++)
         {
             AssignTicketCodes(order);
@@ -82,9 +84,15 @@ public class OrderService : IOrderService
                 await _db.SaveChangesAsync(ct);
                 return ServiceResponse<Order>.Ok(order);
             }
-            catch (DbUpdateException ex) when (IsDuplicateTicketCode(ex) && attempt < MaxCodeAttempts)
+            catch (DbUpdateException ex) when (IsDuplicateTicketCode(ex))
             {
-                // Collision: loop to regenerate codes and try again.
+                if (attempt >= MaxCodeAttempts)
+                    return ServiceResponse<Order>.Fail(
+                        $"Could not generate a unique ticket code after {MaxCodeAttempts} attempts.");
+            }
+            catch (Exception ex) when (ex is DbException or DbUpdateException)
+            {
+                return ServiceResponse<Order>.Fail($"Could not save the order: {ex.Message}");
             }
         }
     }
@@ -160,10 +168,18 @@ public class OrderService : IOrderService
     private async Task<ServiceResponse<Order>> TransitionAsync(
         int orderId, OrderStatus target, CancellationToken ct)
     {
-        var order = await _db.Orders
-            .Include(o => o.Items)
-            .ThenInclude(i => i.Tickets)
-            .FirstOrDefaultAsync(o => o.Id == orderId, ct);
+        Order? order;
+        try
+        {
+            order = await _db.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Tickets)
+                .FirstOrDefaultAsync(o => o.Id == orderId, ct);
+        }
+        catch (DbException ex)
+        {
+            return ServiceResponse<Order>.Fail($"Could not reach the database: {ex.Message}");
+        }
 
         if (order is null)
             return ServiceResponse<Order>.Fail($"Order {orderId} was not found.");
@@ -175,9 +191,11 @@ public class OrderService : IOrderService
             return ServiceResponse<Order>.Fail(
                 $"Illegal order transition: {order.Status} -> {target}.");
 
-        await using var tx = await _db.Database.BeginTransactionAsync(ct);
         try
         {
+            // Disposing an uncommitted transaction rolls it back, so order and
+            // tickets are never left half-updated on failure.
+            await using var tx = await _db.Database.BeginTransactionAsync(ct);
             var now = _clock.GetUtcNow().UtcDateTime;
             order.Status = target;
             order.UpdatedAt = now;
@@ -187,9 +205,8 @@ public class OrderService : IOrderService
             await tx.CommitAsync(ct);
             return ServiceResponse<Order>.Ok(order);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is DbException or DbUpdateException)
         {
-            await tx.RollbackAsync(ct);
             return ServiceResponse<Order>.Fail($"Could not update order {orderId}: {ex.Message}");
         }
     }
@@ -200,10 +217,8 @@ public class OrderService : IOrderService
         {
             var next = target switch
             {
-                // Payment activates pending tickets.
                 OrderStatus.Paid when ticket.Status == TicketStatus.Pending
                     => TicketStatus.Available,
-                // Cancelling/rejecting voids tickets that have not been consumed.
                 (OrderStatus.Cancelled or OrderStatus.Rejected)
                     when ticket.Status is TicketStatus.Pending or TicketStatus.Available
                     => TicketStatus.Cancelled,

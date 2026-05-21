@@ -20,13 +20,4 @@ public static class OrderStateMachine
 
     public static bool CanTransition(OrderStatus from, OrderStatus to) =>
         Transitions.TryGetValue(from, out var allowed) && allowed.Contains(to);
-
-    public static void EnsureCanTransition(OrderStatus from, OrderStatus to)
-    {
-        if (!CanTransition(from, to))
-        {
-            throw new InvalidOperationException(
-                $"Illegal order transition: {from} -> {to}.");
-        }
-    }
 }

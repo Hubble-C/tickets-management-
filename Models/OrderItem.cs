@@ -1,7 +1,5 @@
 namespace tickets_management.Models;
 
-
-//Models para relacionar las bases de datos
 public class OrderItem : BaseEntity
 {
     public int Quantity { get; set; }
