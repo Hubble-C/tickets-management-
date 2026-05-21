@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using tickets_management.Data;
+using tickets_management.Dto;
 using tickets_management.Enums;
 using tickets_management.Models;
 using tickets_management.Response;
@@ -10,14 +12,91 @@ namespace tickets_management.Services;
 
 public class OrderService : IOrderService
 {
+    private const int MaxCodeAttempts = 5;
+
     private readonly MySqlDbContext _db;
     private readonly TimeProvider _clock;
+    private readonly ITicketCodeGenerator _codeGenerator;
 
-    public OrderService(MySqlDbContext db, TimeProvider clock)
+    public OrderService(MySqlDbContext db, TimeProvider clock, ITicketCodeGenerator codeGenerator)
     {
         _db = db;
         _clock = clock;
+        _codeGenerator = codeGenerator;
     }
+
+    public async Task<ServiceResponse<Order>> CreateOrderAsync(
+        CreateOrderDto dto, CancellationToken ct = default)
+    {
+        if (dto.Items.Count == 0)
+            return ServiceResponse<Order>.Fail("An order must contain at least one item.");
+        if (dto.Items.Any(i => i.Seats.Count == 0))
+            return ServiceResponse<Order>.Fail("Every item must include at least one seat.");
+
+        var now = _clock.GetUtcNow().UtcDateTime;
+        var order = new Order
+        {
+            Nit = dto.Nit,
+            CustomerId = dto.CustomerId,
+            PaymentMethod = dto.PaymentMethod,
+            HourAt = dto.HourAt,
+            Status = OrderStatus.Pending,
+            CreatedAt = now,
+            UpdatedAt = now,
+        };
+
+        foreach (var itemDto in dto.Items)
+        {
+            var item = new OrderItem
+            {
+                EventId = itemDto.EventId,
+                PriceTicket = itemDto.PriceTicket,
+                Quantity = itemDto.Seats.Count,
+                Total = itemDto.PriceTicket * itemDto.Seats.Count,
+                CreatedAt = now,
+                UpdatedAt = now,
+            };
+            foreach (var seat in itemDto.Seats)
+            {
+                item.Tickets.Add(new Ticket
+                {
+                    Seat = seat,
+                    EventId = itemDto.EventId,
+                    Status = TicketStatus.Pending,
+                    CreatedAt = now,
+                    UpdatedAt = now,
+                });
+            }
+            order.Items.Add(item);
+        }
+
+        _db.Orders.Add(order);
+
+        // The DB unique index is the source of truth for uniqueness; if a freshly
+        // minted code happens to collide we regenerate every code and retry.
+        for (var attempt = 1; ; attempt++)
+        {
+            AssignTicketCodes(order);
+            try
+            {
+                await _db.SaveChangesAsync(ct);
+                return ServiceResponse<Order>.Ok(order);
+            }
+            catch (DbUpdateException ex) when (IsDuplicateTicketCode(ex) && attempt < MaxCodeAttempts)
+            {
+                // Collision: loop to regenerate codes and try again.
+            }
+        }
+    }
+
+    private void AssignTicketCodes(Order order)
+    {
+        foreach (var ticket in order.Items.SelectMany(i => i.Tickets))
+            ticket.TicketCode = _codeGenerator.Generate();
+    }
+
+    private static bool IsDuplicateTicketCode(DbUpdateException ex) =>
+        ex.InnerException is MySqlException { ErrorCode: MySqlErrorCode.DuplicateKeyEntry };
 
     public Task<ServiceResponse<Order>> MarkAsPaidAsync(int orderId, CancellationToken ct = default) =>
         TransitionAsync(orderId, OrderStatus.Paid, ct);
