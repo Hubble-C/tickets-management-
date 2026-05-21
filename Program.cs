@@ -1,10 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using tickets_management.Data;
+using tickets_management.Services;
+using tickets_management.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Domain services.
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
 
 // Persistence: MySQL via Pomelo. An explicit server version keeps startup
 // offline-friendly (no AutoDetect round-trip to the database at boot).
