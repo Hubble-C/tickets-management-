@@ -42,3 +42,7 @@ packages/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Entradas adicionales de feature/front-box-office
+text
+
