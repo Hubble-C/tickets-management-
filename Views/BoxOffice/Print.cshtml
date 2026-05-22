@@ -1,0 +1,118 @@
+@model OrderConfirmationViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Tickets — Orden #@Model.Order.Id</title>
+    <style>
+        :root { --ticket-width: 48mm; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: var(--ticket-width);
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #000;
+            background: #fff;
+        }
+
+        .ticket {
+            width: var(--ticket-width);
+            padding: 2mm 1mm 4mm;
+            text-align: center;
+            page-break-after: always;
+        }
+        .ticket:last-child { page-break-after: auto; }
+
+        .event {
+            font-size: 11pt;
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 1mm;
+        }
+        .meta {
+            font-size: 8pt;
+            line-height: 1.3;
+            margin-bottom: 2mm;
+        }
+        .meta .label { font-weight: 600; }
+
+        .seat {
+            font-size: 13pt;
+            font-weight: 700;
+            margin: 1mm 0;
+        }
+        
+        .qr { margin: 1mm auto; width: 36mm; height: 36mm; }
+        .qr svg { width: 100% !important; height: 100% !important; display: block; }
+
+        .code {
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 9pt;
+            letter-spacing: 0.5px;
+            margin-top: 1mm;
+            word-break: break-all;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px dashed #000;
+            margin: 2mm 0;
+        }
+
+        .footer {
+            font-size: 7pt;
+            margin-top: 2mm;
+            line-height: 1.3;
+        }
+
+        @@media screen {
+            body { margin: 16px auto; box-shadow: 0 0 0 1px #ddd; }
+            .print-bar { text-align: center; margin: 12px 0; }
+            .print-bar button {
+                font: 14px/1 "Segoe UI", Arial, sans-serif;
+                padding: 8px 16px; cursor: pointer;
+            }
+        }
+        @@media print {
+            .print-bar { display: none !important; }
+            @@page { size: 58mm auto; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-bar">
+        <button type="button" onclick="window.print()">Imprimir tickets</button>
+    </div>
+
+    @foreach (var item in Model.Tickets)
+    {
+        <div class="ticket">
+            <div class="event">Evento #@item.Ticket.EventId</div>
+            <div class="meta">
+                <div><span class="label">Orden:</span> #@Model.Order.Id</div>
+                <div><span class="label">Hora:</span> @Model.Order.HourAt.ToString("HH:mm")</div>
+            </div>
+
+            <div class="seat">Asiento @item.Ticket.Seat</div>
+
+            <div class="qr">@Html.Raw(item.QrSvg)</div>
+
+            <div class="code">@item.Ticket.TicketCode</div>
+
+            <hr class="divider" />
+            <div class="footer">
+                Presente este código en la entrada.<br />
+                Válido solo si la orden está pagada.
+            </div>
+        </div>
+    }
+
+    <script>
+        window.addEventListener("load", function () { window.print(); });
+    </script>
+</body>
+</html>
