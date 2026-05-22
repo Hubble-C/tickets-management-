@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 contexto-ia.md
+appsettings.json
 # Node.js dependencies and logs
 node_modules/
 npm-debug.log*
