@@ -19,6 +19,13 @@ public class BoxOfficeController : Controller
         _tickets = tickets;
         _qr = qr;
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> Print(int id, CancellationToken ct)
+    {
+        var order = await _orders.GetByIdAsync(id, ct);
+        return order is null ? NotFound() : View(BuildConfirmation(order));
+    } 
 
     [HttpGet]
     public IActionResult Checkout() => View(new CheckoutViewModel());

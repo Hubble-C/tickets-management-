@@ -22,7 +22,19 @@
         <button class="btn btn-success btn-sm" type="submit" disabled="@(Model.Order.Status != OrderStatus.Pending)">
             Mark as paid
         </button>
+        
     </form>
+    
+    <form class="d-inline" asp-action="Pay" asp-route-id="@Model.Order.Id" method="post" data-disable-on-submit>
+        <button class="btn btn-success btn-sm" type="submit" disabled="@(Model.Order.Status != OrderStatus.Pending)">
+            Mark as paid
+        </button>
+        <a class="btn btn-outline-primary btn-sm"
+           asp-action="Print" asp-route-id="@Model.Order.Id" target="_blank">
+            Imprimir tickets
+        </a>    
+    </form>
+    
     <form class="d-inline" asp-action="Cancel" asp-route-id="@Model.Order.Id" method="post" data-disable-on-submit>
         <button class="btn btn-outline-danger btn-sm" type="submit"
                 disabled="@(Model.Order.Status is not (OrderStatus.Pending or OrderStatus.Paid))">
