@@ -1,3 +1,5 @@
+using System.Data;
+using Dapper;
 using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
@@ -18,12 +20,14 @@ public class OrderService : IOrderService
     private readonly MySqlDbContext _db;
     private readonly TimeProvider _clock;
     private readonly ITicketCodeGenerator _codeGenerator;
-
-    public OrderService(MySqlDbContext db, TimeProvider clock, ITicketCodeGenerator codeGenerator)
+    private readonly IDbConnection _catalogDb;
+    
+    public OrderService(MySqlDbContext db, TimeProvider clock, ITicketCodeGenerator codeGenerator,  IDbConnection catalogDb)
     {
         _db = db;
         _clock = clock;
         _codeGenerator = codeGenerator;
+        _catalogDb =  catalogDb;
     }
 
     public async Task<ServiceResponse<Order>> CreateOrderAsync(
@@ -48,6 +52,18 @@ public class OrderService : IOrderService
 
         foreach (var itemDto in dto.Items)
         {
+            var SendDapper = await _catalogDb.QueryFirstOrDefaultAsync<dynamic>("SELECT Price FROM Events WHERE Id = @Id", new {Id = itemDto.EventId});
+
+            if (SendDapper == null)
+            {
+                return ServiceResponse<Order>.Fail($"Could not find an event with id {itemDto.EventId}");
+            }else if (SendDapper.Price != itemDto.PriceTicket)
+            {
+                return ServiceResponse<Order>.Fail($"Invalid Price entered {itemDto.EventId}");
+            }
+            
+            
+            
             var item = new OrderItem
             {
                 EventId = itemDto.EventId,

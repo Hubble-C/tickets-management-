@@ -1,4 +1,6 @@
+using System.Data;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using tickets_management.Data;
 using tickets_management.Services;
 using tickets_management.Services.Interfaces;
@@ -7,19 +9,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
-// Domain services.
+
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ITicketCodeGenerator, TicketCodeGenerator>();
 builder.Services.AddSingleton<IQrCodeService, QrCodeService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 
-// Persistence: MySQL via Pomelo. An explicit server version keeps startup
-// offline-friendly (no AutoDetect round-trip to the database at boot).
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+var DbSalesConnection = builder.Configuration.GetConnectionString("DbSalesConnection")
+                       ?? throw new InvalidOperationException("Connection string 'DbSales' was not found.");
 builder.Services.AddDbContext<MySqlDbContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36))));
+    options.UseMySql(DbSalesConnection, new MySqlServerVersion(new Version(8, 0, 36))));
+
+var DbCatalogConnection = builder.Configuration.GetConnectionString("DbCatalogConnection")
+                        ?? throw new InvalidOperationException("Connection string 'DbCatalogConnection' was not found.");
+builder.Services.AddTransient<IDbConnection>(sp => new MySqlConnection(DbCatalogConnection) );
 
 var app = builder.Build();
 
@@ -31,16 +35,17 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+app.UseStaticFiles(); 
+
 app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
 
 app.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
