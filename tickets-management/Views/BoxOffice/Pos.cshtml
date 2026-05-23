@@ -1,227 +1,374 @@
-@{
-    ViewData["Title"] = "POS – Theater Box Office";
-    Layout = "_Layout";
-}
-
-<div class="min-h-screen">
-  <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3 sticky top-0 z-50">
-    <div class="flex items-center justify-between max-w-7xl mx-auto">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-cyan-600 rounded-lg flex items-center justify-center">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-lg font-bold text-slate-900 dark:text-white">Theater POS</h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400">
-            Booth #1
-          </p>
-        </div>
-      </div>
-      <nav class="flex items-center gap-2">
-        <span class="hidden sm:block text-sm text-slate-600 dark:text-slate-300 font-medium">Carlos Ramírez</span>
-        <a href="@Url.Action("Logout","BoxOffice")"
-           class="btn-touch h-10 px-4 flex items-center gap-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg font-medium hover:bg-red-200 transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-          </svg>
-          <span class="hidden sm:inline">Logout</span>
-        </a>
-      </nav>
-    </div>
-  </header>
-
-  <form asp-action="Checkout" method="post" class="max-w-7xl mx-auto p-4">
-    @Html.AntiForgeryToken()
-    <div class="grid lg:grid-cols-5 gap-4">
-
-      <!-- Panel Izquierdo -->
-      <section class="lg:col-span-3 space-y-4">
-
-        <!-- Selección de Funciones (Tarjetas visuales) -->
-        <article class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-          <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">Select Show</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+<div id="pos-app-container" class="flex h-screen w-screen overflow-hidden">
+        
+        <aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex flex-col py-6 z-20">
+            <div class="px-6 mb-8">
+                <h1 class="text-2xl font-bold text-primary tracking-tight">CinePOS</h1>
+                <p class="text-on-surface-variant text-xs font-semibold opacity-70 tracking-wider uppercase mt-1">Terminal 01 - Main Lobby</p>
+            </div>
             
-            <label class="btn-touch flex items-start gap-3 p-4 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-left hover:border-cyan-600 dark:hover:border-cyan-500 cursor-pointer transition-all has-[:checked]:border-cyan-600 has-[:checked]:bg-cyan-50 dark:has-[:checked]:bg-cyan-900/20">
-              <input type="radio" name="ShowId" value="1" checked class="sr-only">
-              <div class="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>
-                </svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-bold text-slate-900 dark:text-white truncate">The Phantom of the Opera</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400">Monday, October 12 • 07:00 PM</p>
-                <p class="text-sm font-semibold text-cyan-600 dark:text-cyan-400">$45.00</p>
-              </div>
-            </label>
-
-            <label class="btn-touch flex items-start gap-3 p-4 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-left hover:border-cyan-600 dark:hover:border-cyan-500 cursor-pointer transition-all has-[:checked]:border-cyan-600 has-[:checked]:bg-cyan-50 dark:has-[:checked]:bg-cyan-900/20">
-              <input type="radio" name="ShowId" value="2" class="sr-only">
-              <div class="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>
-                </svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-bold text-slate-900 dark:text-white truncate">Hamilton</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400">Tuesday, October 13 • 08:30 PM</p>
-                <p class="text-sm font-semibold text-cyan-600 dark:text-cyan-400">$65.00</p>
-              </div>
-            </label>
-
-            <label class="btn-touch flex items-start gap-3 p-4 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-left hover:border-cyan-600 dark:hover:border-cyan-500 cursor-pointer transition-all has-[:checked]:border-cyan-600 has-[:checked]:bg-cyan-50 dark:has-[:checked]:bg-cyan-900/20">
-              <input type="radio" name="ShowId" value="3" class="sr-only">
-              <div class="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>
-                </svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-bold text-slate-900 dark:text-white truncate">Les Misérables</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400">Wednesday, October 14 • 02:00 PM</p>
-                <p class="text-sm font-semibold text-cyan-600 dark:text-cyan-400">$55.00</p>
-              </div>
-            </label>
-
-            <label class="btn-touch flex items-start gap-3 p-4 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-left hover:border-cyan-600 dark:hover:border-cyan-500 cursor-pointer transition-all has-[:checked]:border-cyan-600 has-[:checked]:bg-cyan-50 dark:has-[:checked]:bg-cyan-900/20">
-              <input type="radio" name="ShowId" value="4" class="sr-only">
-              <div class="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>
-                </svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-bold text-slate-900 dark:text-white truncate">The Lion King</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400">Thursday, October 15 • 07:00 PM</p>
-                <p class="text-sm font-semibold text-cyan-600 dark:text-cyan-400">$50.00</p>
-              </div>
-            </label>
-
-          </div>
-        </article>
-
-        <!-- Mapa de Asientos (Grilla visual de sillas) -->
-        <article class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-          <header class="flex items-center justify-between mb-4">
-            <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Select Seats</h2>
-            <div class="flex items-center gap-4 text-xs" role="legend" aria-label="Seat legend">
-              <span class="flex items-center gap-1">
-                <span class="w-4 h-4 rounded bg-slate-200 dark:bg-slate-600"></span>
-                <span class="text-slate-600 dark:text-slate-400">Available</span>
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="w-4 h-4 rounded bg-cyan-600"></span>
-                <span class="text-slate-600 dark:text-slate-400">Selected</span>
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="w-4 h-4 rounded bg-slate-400 dark:bg-slate-500"></span>
-                <span class="text-slate-600 dark:text-slate-400">Occupied</span>
-              </span>
-            </div>
-          </header>
-
-          <div class="bg-gradient-to-b from-cyan-600 to-cyan-700 text-white text-center py-2 rounded-t-xl text-sm font-bold tracking-wider mb-4">
-            STAGE
-          </div>
-
-          <div class="overflow-x-auto pb-2">
-            <div class="flex flex-col items-center gap-2 min-w-fit">
-              
-              <!-- Filas A a la H -->
-              @foreach (var row in new[] { "A", "B", "C", "D", "E", "F", "G", "H" })
-              {
-                <div class="flex items-center gap-1">
-                  <span class="w-6 text-xs font-bold text-slate-400 dark:text-slate-500 text-center" aria-hidden="true">@row</span>
-                  <div class="flex gap-1">
-                    @for (int i = 1; i <= 12; i++)
-                    {
-                      var seatId = $"{row}{i}";
-                      // Simular asientos ocupados de manera visual
-                      var isOccupied = (row == "A" && i == 3) || (row == "B" && i == 5) || (row == "C" && i == 8);
-
-                      if (isOccupied)
-                      {
-                        <button type="button" disabled class="seat w-8 h-8 sm:w-9 sm:h-9 rounded-t-lg text-xs font-bold bg-slate-400 dark:bg-slate-500 cursor-not-allowed text-white">
-                          @i
-                        </button>
-                      }
-                      else
-                      {
-                        <label class="seat w-8 h-8 sm:w-9 sm:h-9 rounded-t-lg text-xs font-bold bg-slate-200 dark:bg-slate-600 hover:bg-cyan-400 dark:hover:bg-cyan-500 text-slate-600 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-all has-[:checked]:bg-cyan-600 has-[:checked]:text-white">
-                          <input type="checkbox" name="seats" value="@seatId" class="sr-only">
-                          @i
-                        </label>
-                      }
-                    }
-                  </div>
-                  <span class="w-6 text-xs font-bold text-slate-400 dark:text-slate-500 text-center" aria-hidden="true">@row</span>
+            <nav class="flex-1 space-y-1 px-2">
+                <div onclick="showCatalogView()" id="nav-events" class="flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container border-r-4 border-primary font-bold transition-all duration-150 cursor-pointer rounded-r-lg">
+                    <a asp-action="Pos" asp-controller="BoxOffice" class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high transition-colors group">
+                        <span class="material-symbols-outlined">confirmation_number</span>
+                        <span class="text-sm">Events</span>
+                    </a>
+                    
                 </div>
-              }
+                <div class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer rounded-lg">
+                    <a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high transition-colors group" asp-controller="BoxOffice" asp-action="Orders">
+                        <span class="material-symbols-outlined">receipt_long</span>
+                        <span class="text-sm">Orders</span>
+                    </a>
+                </div>
+            </nav>
 
+            <div class="px-4 mt-auto pt-6">
+                <button onclick="showCatalogView()" class="w-full bg-primary text-on-primary py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all text-sm shadow-md">
+                    <span class="material-symbols-outlined text-lg">add</span>
+                    New Transaction
+                </button>
+                <div class="mt-6 flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container-high cursor-pointer">
+                    <img alt="Cashier Portrait" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5vrVF1eYC992Gzt6Au88Cr5bX7oVyo4G7F1efRPezzbXqmUYgBEs1injblzmxyKLkV7T8TdhJR3c8aKXyQE5HTY7AszhaTSO0ZZTx6FoNhrcsLXvq89i9hy26YFJ_s8U0dFow2TDdixLXvmt1jltK0-EBGiikvlyjtCFplAXXTRMpO1mS9zgQZu3Zm6u0UGtblj9vf9nrFdeeAndrqGwbd7Yc93KYT2KsbS2g4yVJj1xu-4C-l71fp84NIvUXkQREpI9psm6jQJCs"/>
+                    <div>
+                        <p class="font-bold text-on-surface text-sm leading-none">Alex Rivers</p>
+                        <p class="text-on-surface-variant text-[10px] font-semibold uppercase tracking-wider mt-1">CASHIER</p>
+                    </div>
+                </div>
             </div>
-          </div>
-        </article>
+        </aside>
 
-      </section>
+        <div class="flex-1 ml-64 flex flex-col h-full overflow-hidden">
+            
+            <section id="view-pos-catalog" class="flex flex-col flex-1 h-full overflow-hidden">
+                <header class="h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-8 sticky top-0 z-10">
+                    <div class="flex items-center flex-1 max-w-2xl">
+                        <div class="relative w-full">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                            <input class="w-full pl-10 pr-4 py-1.5 bg-surface-container-low border-none rounded-full text-sm focus:ring-2 focus:ring-primary outline-none" placeholder="Buscar eventos, películas o funciones..." type="text"/>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-6 ml-6">
+                        <button class="flex items-center gap-2 bg-primary-container/10 text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase hover:bg-primary-container/20 transition-all active:scale-[0.98]">
+                            <span class="material-symbols-outlined text-lg">person_add</span>
+                            Registrar Nuevo Cliente
+                        </button>
+                        <div class="h-8 w-px bg-outline-variant"></div>
+                        <div class="flex items-center gap-4">
+                            <button class="p-1.5 rounded-full hover:bg-secondary-container/50 transition-all relative">
+                                <span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+                                <span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+                            </button>
+                            <button class="p-1.5 rounded-full hover:bg-secondary-container/50 transition-all">
+                                <span class="material-symbols-outlined text-on-surface-variant">help_outline</span>
+                            </button>
+                        </div>
+                    </div>
+                </header>
 
-      <!-- Panel Derecho – Resumen de Compra -->
-      <aside class="lg:col-span-2">
-        <section class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 sticky top-20">
-          <header class="p-4 border-b border-slate-200 dark:border-slate-700">
-            <h2 class="text-lg font-bold text-slate-900 dark:text-white">Order Summary</h2>
-          </header>
+                <div class="p-8 space-y-6 flex-1 overflow-y-auto">
+                    <div class="flex justify-between items-end mb-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-on-surface">Eventos Disponibles</h2>
+                            <p class="text-sm text-on-surface-variant">Selecciona una función para iniciar la venta</p>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="bg-surface-container-high p-4 rounded-xl flex items-center gap-4 min-w-[160px]">
+                                <span class="material-symbols-outlined text-primary text-[32px]">event_seat</span>
+                                <div>
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Ocupación Hoy</p>
+                                    <p class="text-xl font-bold text-primary">84%</p>
+                                </div>
+                            </div>
+                            <div class="bg-surface-container-high p-4 rounded-xl flex items-center gap-4 min-w-[160px]">
+                                <span class="material-symbols-outlined text-tertiary text-[32px]">trending_up</span>
+                                <div>
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Ventas Shift</p>
+                                    <p class="text-xl font-bold text-tertiary">$12,450</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-          <div class="p-4 space-y-4">
-            <div>
-              <label for="customerEmail" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
-                Customer Email *
-              </label>
-              <input type="email" id="customerEmail" name="customerEmail" required
-                     class="w-full h-14 px-4 text-base bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:border-cyan-600 focus:ring-0 outline-none transition-colors"
-                     placeholder="customer@email.com">
-            </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div onclick="showSeatsView('Odisea Estelar')" class="group event-card bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-300 cursor-pointer flex flex-col h-full">
+                            <div class="relative aspect-[2/3] overflow-hidden">
+                                <img alt="Cinema Poster 1" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADL15HcO4idGOxvSP31b3FfaSDI2Ewe-nReOk8IbxsJ3d8tKHUvH8vrwVDBUZTw3q3pgga99knPt0WBdpCttXGvOpLBn2kmQ6mkUbUZfkKZZvzN6x_UVa1bRYSoCt5VTA-gf-RCOXkTV3pE1m3_0as-VF18tif_8M1-yY5ifadDWy-UgpVJV88UYX8u4Me-qPqHKlleyvpdwg35cIvdc7zwxRKTUqmpxd0smvSYAisCJv6XA9N3uocKT-qnEXblqrM-O0HBfssveUP"/>
+                                <div class="absolute top-3 right-3 bg-primary-container text-on-primary-container px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase">PREMIER</div>
+                                <div class="event-overlay absolute inset-0 bg-primary/20 opacity-0 transition-opacity duration-300 flex items-center justify-center">
+                                    <span class="bg-primary text-on-primary px-6 py-2 rounded-full font-bold shadow-lg">Comprar Tickets</span>
+                                </div>
+                            </div>
+                            <div class="p-4 space-y-1 flex-1 flex flex-col">
+                                <h3 class="text-lg font-bold text-on-surface line-clamp-1">Odisea Estelar</h3>
+                                <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
+                                    <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                                    <span>Hoy, 18:30 & 21:00</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
+                                    <span class="material-symbols-outlined text-[18px]">location_on</span>
+                                    <span>Sala 04 - IMAX</span>
+                                </div>
+                                <div class="pt-3 mt-auto flex justify-between items-center border-t border-outline-variant/30">
+                                    <span class="text-[10px] font-bold text-on-surface-variant uppercase">Desde</span>
+                                    <span class="text-lg font-bold text-primary">$120.00</span>
+                                </div>
+                            </div>
+                        </div>
 
-            <fieldset>
-              <legend class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Payment Method</legend>
-              <div class="grid grid-cols-2 gap-3">
-                <label class="btn-touch h-20 flex flex-col items-center justify-center gap-2 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 hover:border-cyan-600 hover:text-cyan-600 cursor-pointer transition-all has-[:checked]:border-cyan-600 has-[:checked]:bg-cyan-50 has-[:checked]:text-cyan-600">
-                  <input type="radio" name="paymentMethod" value="CASH" checked required class="sr-only">
-                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                  </svg>
-                  <span class="font-bold">CASH</span>
-                </label>
-                <label class="btn-touch h-20 flex flex-col items-center justify-center gap-2 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 hover:border-cyan-600 hover:text-cyan-600 cursor-pointer transition-all has-[:checked]:border-cyan-600 has-[:checked]:bg-cyan-50 has-[:checked]:text-cyan-600">
-                  <input type="radio" name="paymentMethod" value="CARD" required class="sr-only">
-                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                  </svg>
-                  <span class="font-bold">CARD</span>
-                </label>
-              </div>
-            </fieldset>
+                        <div onclick="showSeatsView('Sombras de la Ciudad')" class="group event-card bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-300 cursor-pointer flex flex-col h-full">
+                            <div class="relative aspect-[2/3] overflow-hidden">
+                                <img alt="Cinema Poster 2" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD37c8H0s4lzpiUKWzfddhbXFAKCQbjKQ515snzg6D-_fckGn_3ZZMQ1xU6rPTQACXWyk4osbApBa_WqPhwyNqWU6SgQJO1GMhIyGuNlJFWtDLnS30Yj5-YsfBCR6Ug52r2aRNVQc5fKfNmVTtj2Zrc89uJ3P7V-rqaEpIRjLLNK15cFX5J1BoJuoz4MKESpECBEK4DS6QUVJYN7bq-Xq_7RIsYaahh5G0cW3ZxxuFbrHI8YU3n4QWvTpTUJ9zEQFtgPLwt50VIOteT"/>
+                                <div class="event-overlay absolute inset-0 bg-primary/20 opacity-0 transition-opacity duration-300 flex items-center justify-center">
+                                    <span class="bg-primary text-on-primary px-6 py-2 rounded-full font-bold shadow-lg">Comprar Tickets</span>
+                                </div>
+                            </div>
+                            <div class="p-4 space-y-1 flex-1 flex flex-col">
+                                <h3 class="text-lg font-bold text-on-surface line-clamp-1">Sombras de la Ciudad</h3>
+                                <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
+                                    <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                                    <span>Mañana, 19:15</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
+                                    <span class="material-symbols-outlined text-[18px]">location_on</span>
+                                    <span>Sala 02 - VIP</span>
+                                </div>
+                                <div class="pt-3 mt-auto flex justify-between items-center border-t border-outline-variant/30">
+                                    <span class="text-[10px] font-bold text-on-surface-variant uppercase">Desde</span>
+                                    <span class="text-lg font-bold text-primary">$180.00</span>
+                                </div>
+                            </div>
+                        </div>
 
-            <div class="pt-4 border-t border-slate-200 dark:border-slate-700 space-y-2">
-              <div class="flex justify-between text-sm">
-                <span class="text-slate-500 dark:text-slate-400">Total Price</span>
-                <span class="text-cyan-600 font-bold">$45.00</span>
-              </div>
-            </div>
+                        <div onclick="showSeatsView('El Susurro del Viento')" class="group event-card bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-300 cursor-pointer flex flex-col h-full">
+                            <div class="relative aspect-[2/3] overflow-hidden">
+                                <img alt="Cinema Poster 3" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC98qGtPIVQcdgVnQbIGjxNYyK_D3FbWALjQSx5BhsTdCjdzXe2HmyDWPKN_2wKOWnpKcIy7G1hzowWNnyuFBY7u3pWNIAfNEgA2pIRGtBrNGrho6GL4YlNapktKQufLPOMe2SwfmTkV2jvLDSobEbKd7ZcOoRidy8_ZkXWXJgVbBu-FznWH53ivWGNafdbyHudUMwXDEP5jmf0O87k-Hr7CC_wcaeuSCkIDVtpQnOEIFMdFfxUWmgbnUnDoiuTk23Gu4_mahq9DRtK"/>
+                                <div class="absolute top-3 right-3 bg-error text-white px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase">LAST CHANCE</div>
+                                <div class="event-overlay absolute inset-0 bg-primary/20 opacity-0 transition-opacity duration-300 flex items-center justify-center">
+                                    <span class="bg-primary text-on-primary px-6 py-2 rounded-full font-bold shadow-lg">Comprar Tickets</span>
+                                </div>
+                            </div>
+                            <div class="p-4 space-y-1 flex-1 flex flex-col">
+                                <h3 class="text-lg font-bold text-on-surface line-clamp-1">El Susurro del Viento</h3>
+                                <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
+                                    <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                                    <span>Hoy, 22:30</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
+                                    <span class="material-symbols-outlined text-[18px]">location_on</span>
+                                    <span>Sala 01 - Standard</span>
+                                </div>
+                                <div class="pt-3 mt-auto flex justify-between items-center border-t border-outline-variant/30">
+                                    <span class="text-[10px] font-bold text-on-surface-variant uppercase">Desde</span>
+                                    <span class="text-lg font-bold text-primary">$95.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-            <button type="submit"
-                    class="w-full h-20 bg-cyan-600 hover:bg-cyan-700 active:bg-cyan-800 text-white text-2xl font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 mt-4">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-              </svg>
-              Checkout &amp; Print
-            </button>
-          </div>
-        </section>
-      </aside>
+            <section id="view-seats-selection" class="flex flex-1 h-full overflow-hidden hidden">
+                <div class="flex-1 overflow-hidden flex flex-col bg-surface-container-lowest">
+                    
+                    <div class="px-8 py-5 bg-surface-container-low border-b border-outline-variant flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <button onclick="showCatalogView()" class="text-primary flex items-center hover:underline text-sm font-bold">
+                                    <span class="material-symbols-outlined text-md">arrow_back</span> Volver a Cartelera
+                                </button>
+                            </div>
+                            <h3 id="selected-movie-title" class="text-2xl font-bold text-on-surface">Hamlet: El Príncipe de Dinamarca</h3>
+                            <div class="flex gap-6 mt-1 text-on-surface-variant">
+                                <span class="flex items-center gap-1 text-sm">
+                                    <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                                    Viernes, 14 Jun • 19:30
+                                </span>
+                                <span class="flex items-center gap-1 text-sm">
+                                    <span class="material-symbols-outlined text-[18px]">location_on</span>
+                                    Teatro Nacional de San Salvador
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[10px] text-on-surface-variant opacity-70 uppercase font-bold">Categoría</label>
+                                <select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5 text-sm min-w-[140px] outline-none">
+                                    <option>Todas</option>
+                                    <option>VIP</option>
+                                    <option>General</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[10px] text-on-surface-variant opacity-70 uppercase font-bold">Sección</label>
+                                <select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5 text-sm min-w-[140px] outline-none">
+                                    <option>Platea Baja</option>
+                                    <option>Platea Alta</option>
+                                    <option>Palcos</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
+                    <div class="flex-1 overflow-auto p-8 flex flex-col items-center">
+                        <div class="w-full max-w-5xl">
+                            <div class="w-full h-10 bg-secondary rounded-b-3xl flex items-center justify-center mb-8 shadow-md relative overflow-hidden">
+                                <span class="text-on-primary text-xs font-semibold tracking-[0.3em] uppercase">Escenario / Stage</span>
+                                <div class="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent"></div>
+                            </div>
+
+                            <div class="flex justify-center gap-6 mb-8 border-b border-outline-variant pb-4 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded bg-surface-container border border-outline-variant"></div>
+                                    <span>DISPONIBLE</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded bg-primary"></div>
+                                    <span>SELECCIONADO</span>
+                                </div>
+                                <div class="flex items-center gap-2 opacity-50">
+                                    <div class="w-4 h-4 rounded bg-outline-variant flex items-center justify-center text-[10px] text-white">X</div>
+                                    <span>OCUPADO</span>
+                                </div>
+                                <div class="h-4 w-[1px] bg-outline-variant mx-2"></div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded bg-tertiary"></div>
+                                    <span>VIP ($110)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded bg-primary-container"></div>
+                                    <span>GENERAL ($65)</span>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2 items-center py-6 bg-surface-container-low/30 rounded-xl border border-dashed border-outline-variant">
+                                <p class="text-xs font-bold text-on-surface-variant mb-6 uppercase tracking-widest">Platea Baja</p>
+                                <div id="dynamic-grid-placeholder" class="flex flex-col gap-1.5">
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="w-96 bg-surface border-l border-outline-variant flex flex-col p-6 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.05)] z-10">
+                    <div class="mb-6">
+                        <h4 class="text-lg font-bold text-on-surface mb-3">Resumen de Orden</h4>
+                        <div class="bg-surface-container-high/50 rounded-lg p-4 border border-outline-variant">
+                            <p class="font-bold text-primary text-sm">Detalles de la sesión</p>
+                            <p id="summary-movie-title" class="text-sm text-on-surface-variant">Hamlet: El Príncipe de Dinamarca</p>
+                            <p class="text-xs font-semibold text-on-surface-variant/70 mt-1">Platea Baja • 14 Jun 19:30</p>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto pr-1">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Boletos Seleccionados (2)</h4>
+                            <button class="text-primary font-bold text-xs hover:underline">Limpiar</button>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="p-4 rounded-lg bg-surface-container-lowest border border-outline-variant flex items-center justify-between group hover:border-primary transition-colors">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
+                                        <span class="material-symbols-outlined">stars</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-on-surface text-sm">Asiento B-12</p>
+                                        <p class="text-[10px] font-bold text-tertiary uppercase">ZONA VIP</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-mono font-bold text-sm">$110.00</p>
+                                    <button class="text-error opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span class="material-symbols-outlined text-md">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-outline-variant border-dashed">
+                        <div class="space-y-2 mb-6 text-sm">
+                            <div class="flex justify-between items-center text-on-surface-variant">
+                                <span>Subtotal</span>
+                                <span class="font-mono">$220.00</span>
+                            </div>
+                            <div class="flex justify-between items-center text-on-surface-variant">
+                                <span>Cargos por servicio</span>
+                                <span class="font-mono">$15.40</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-3 border-t border-outline-variant/30">
+                                <span class="text-lg font-bold">Total</span>
+                                <span class="text-lg font-bold text-primary">$235.40</span>
+                            </div>
+                        </div>
+                        <a asp-action="Orders" asp-controller="BoxOffice">
+                            <button class="w-full bg-primary text-on-primary h-14 rounded-lg font-bold flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
+                                Continuar
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                        </a>
+                    </div>
+                </aside>
+            </section>
+
+        </div>
     </div>
-  </form>
-</div>
+
+    <script>
+        // Render dinámico del mapa de asientos removiendo el document.write antiguo
+        const rowsArr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+        const gridTarget = document.getElementById('dynamic-grid-placeholder');
+
+        gridTarget.innerHTML = rowsArr.map(row => `
+            <div class="flex items-center gap-4">
+                <span class="w-6 text-right font-mono text-xs text-on-surface-variant/60">${row}</span>
+                <div class="seat-grid">
+                    ${Array(20).fill(0).map((_, i) => {
+                        const isOccupied = Math.random() < 0.25;
+                        const isVip = ['A', 'B', 'C'].includes(row);
+                        const seatClass = isOccupied 
+                            ? 'bg-outline-variant text-white cursor-not-allowed pointer-events-none' 
+                            : isVip 
+                                ? 'bg-surface-container text-tertiary border border-tertiary/20 hover:ring-2 hover:ring-tertiary/50' 
+                                : 'bg-surface-container text-primary border border-primary/20 hover:ring-2 hover:ring-primary/50';
+                        return `
+                            <button class="seat-btn w-6 h-6 rounded-sm transition-all flex items-center justify-center font-mono text-[10px] ${seatClass}">
+                                ${isOccupied ? 'X' : i + 1}
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
+                <span class="w-6 text-left font-mono text-xs text-on-surface-variant/60">${row}</span>
+            </div>
+        `).join('');
+
+        // Manejo manual de la selección visual de sillas
+        document.querySelectorAll('.seat-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.classList.contains('bg-primary')) {
+                    this.classList.remove('bg-primary', 'text-white', 'ring-2', 'ring-primary', 'scale-110');
+                } else {
+                    this.classList.add('bg-primary', 'text-white', 'ring-2', 'ring-primary', 'scale-110');
+                }
+            });
+        });
+
+        // Alternancia de Vistas (Control UI mediante Clases)
+        function showSeatsView(movieName) {
+            document.getElementById('view-pos-catalog').classList.add('hidden');
+            document.getElementById('view-seats-selection').classList.remove('hidden');
+            
+            // Actualiza los headers con el título del evento elegido
+            document.getElementById('selected-movie-title').innerText = movieName;
+            document.getElementById('summary-movie-title').innerText = movieName;
+
+            // Sincroniza estilo activo en sidebar
+            document.getElementById('nav-events').className = "flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container border-r-4 border-primary font-bold transition-all duration-150 cursor-pointer rounded-r-lg";
+        }
+
+        function showCatalogView() {
+            document.getElementById('view-seats-selection').classList.add('hidden');
+            document.getElementById('view-pos-catalog').classList.remove('hidden');
+        }
+    </script>

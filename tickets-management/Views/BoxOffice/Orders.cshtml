@@ -1,0 +1,217 @@
+<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex flex-col py-xl">
+    <div class="px-lg mb-xl">
+        <h1 class="font-headline-md text-headline-md font-bold text-primary">CinePOS</h1>
+        <p class="text-on-surface-variant font-body-md text-sm opacity-70">Terminal 01 - Main Lobby</p>
+    </div>
+    
+    <nav class="flex-1 space-y-xs">
+        <div class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer rounded-lg">
+            <a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high transition-colors group" asp-controller="BoxOffice" asp-action="Orders">
+                <span class="material-symbols-outlined">receipt_long</span>
+                <span class="text-sm">Events</span>
+            </a>
+        </div>
+        <div class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer rounded-lg">
+            <a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high transition-colors group" asp-controller="BoxOffice" asp-action="Orders">
+                <span class="material-symbols-outlined">receipt_long</span>
+                <span class="text-sm">Orders</span>
+            </a>
+        </div>
+    </nav>
+    
+    <div class="mt-auto px-md">
+        <button class="w-full bg-primary text-on-primary py-md rounded-lg font-bold flex items-center justify-center gap-sm hover:opacity-90 transition-all">
+            <span class="material-symbols-outlined">add</span>
+            New Transaction
+        </button>
+        <div class="mt-lg pt-lg border-t border-outline-variant flex items-center gap-sm">
+            <img alt="Cashier Portrait" class="w-10 h-10 rounded-full bg-surface-container-high" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0XtId4L4OQXZZKvz5aj5ryVSFvzPFC2_xC-zmDbKE_qCL8qFYFa3IbJipCPzugdmlt8I86_u8ShGQOCIAeEUXWoVJf8CMd5QYBSKCAPAFsJw5kjM3lEgmmF2N6s3jz6gfuuJvmtwl4gYaHm7Uy1rBbTeQ9bjQYd9fn3DNwUoElv1gQwMmPTnfeai9koecgzG3jAuDugq-QiqDOWSqOYxwKbuYGyY3hupbKu8tN2ps4J_QOYeAExTiBQZAqa6AybwEJ765RKX3YvPE"/>
+            <div>
+                <p class="font-bold text-sm">Elena R.</p>
+                <p class="text-xs text-on-surface-variant">Shift Manager</p>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-lg z-10">
+    <div class="flex items-center gap-lg">
+        <h2 class="font-headline-md text-headline-md font-bold text-primary">Box Office Central</h2>
+        <div class="relative w-64">
+            <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline">search</span>
+            <input class="w-full pl-xl pr-md py-xs bg-surface-container-lowest border border-outline-variant rounded-full text-sm focus:outline-none focus:border-primary" placeholder="Search transactions..." type="text"/>
+        </div>
+    </div>
+    
+    <div class="flex items-center gap-md">
+        <button class="flex items-center gap-xs px-md py-xs border border-outline-variant rounded-lg text-sm hover:bg-secondary-container/50 transition-colors">
+            <span class="material-symbols-outlined text-sm">history</span>
+            Shift Summary
+        </button>
+        <div class="flex gap-sm">
+            <span class="material-symbols-outlined p-xs hover:bg-secondary-container/50 rounded-full cursor-pointer">notifications</span>
+            <span class="material-symbols-outlined p-xs hover:bg-secondary-container/50 rounded-full cursor-pointer">help_outline</span>
+        </div>
+    </div>
+</header>
+
+<main class="ml-64 mt-16 p-xl min-h-[calc(100vh-4rem)]">
+    <div class="grid grid-cols-12 gap-xl max-w-7xl mx-auto">
+        
+        <div class="col-span-7 flex flex-col gap-lg">
+            <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm h-full">
+                <div class="flex border-b border-outline-variant mb-xl">
+                    <button class="px-xl py-md font-headline-md text-headline-md text-primary border-b-2 border-primary transition-all duration-200" id="tab-new">
+                        Registrar Nuevo Usuario
+                    </button>
+                    <button class="px-xl py-md font-headline-md text-headline-md text-on-surface-variant hover:text-primary transition-all duration-200" id="tab-existing">
+                        Cliente Existente
+                    </button>
+                </div>
+                
+                <div class="space-y-lg">
+                    <div class="grid grid-cols-2 gap-md">
+                        <div class="flex flex-col gap-xs">
+                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Nombre Completo</label>
+                            <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Ej. Juan Pérez" type="text"/>
+                        </div>
+                        <div class="flex flex-col gap-xs">
+                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Identificación (ID)</label>
+                            <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="00000000-0" type="text"/>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col gap-xs">
+                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Correo Electrónico</label>
+                        <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="juan.perez@email.com" type="email"/>
+                    </div>
+                    
+                    <div class="flex flex-col gap-xs">
+                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Teléfono (Opcional)</label>
+                        <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="+34 000 000 000" type="tel"/>
+                    </div>
+                    
+                    <div class="pt-md border-t border-outline-variant">
+                        <div class="flex items-center gap-sm">
+                            <input class="w-5 h-5 rounded text-primary focus:ring-primary border-outline-variant" id="loyalty" type="checkbox"/>
+                            <label class="font-body-md text-on-surface-variant" for="loyalty">Inscribir en programa de lealtad (CineRewards)</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-xl relative rounded-xl overflow-hidden aspect-[16/6] bg-surface-container">
+                        <img class="w-full h-full object-cover mix-blend-multiply opacity-20" data-alt="A wide angle cinematic shot of a modern movie theater interior..." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxnJVrijy9_ugkXcwaleJoE6cGeCnoAU6IJNV9vqylbTs2T_MA59p1LI8hZXwXxl8OsMbOIAUiBNXn4mgOqJRnHIxtwC3BYG6j_WAIpO2zoUba7_WkqsU56WWJOIX04dSnQ4-qf0TMSCveD6caoYBsrUgLO_MpC7GNzGgnGPUStCphiHTAFMP8oIXpaqiHtonKTs7VPEyMQjO--TY8vCSOhpoFngj1A7UMSkCsAM5O4J1SyBoxEAo7xSrnswm1mlPSL8DKEI7NJHWZ"/>
+                        <div class="absolute inset-0 flex flex-col justify-center px-xl">
+                            <span class="font-headline-md text-headline-md text-primary font-bold">Capture Customer Joy</span>
+                            <p class="font-body-md text-on-surface-variant max-w-sm mt-xs">Registering users allows for personalized offers and digital ticket delivery.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-span-5 flex flex-col gap-lg">
+            <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm">
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-lg font-bold">Resumen del Pedido</h3>
+                
+                <div class="space-y-md mb-xl">
+                    <div class="flex justify-between items-center py-sm border-b border-outline-variant border-dashed">
+                        <div>
+                            <p class="font-body-lg font-bold">2x Entrada Adulto - IMAX</p>
+                            <p class="text-xs text-on-surface-variant">Fila H, Asientos 12, 13</p>
+                        </div>
+                        <p class="font-data-mono text-data-mono">€24.00</p>
+                    </div>
+                    <div class="flex justify-between items-center py-sm border-b border-outline-variant border-dashed">
+                        <div>
+                            <p class="font-body-lg font-bold">1x Combo Familiar</p>
+                            <p class="text-xs text-on-surface-variant">Palomitas G + 2 Bebidas</p>
+                        </div>
+                        <p class="font-data-mono text-data-mono">€15.50</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-sm">
+                    <div class="flex justify-between font-body-md text-on-surface-variant">
+                        <span>Subtotal</span>
+                        <span class="font-data-mono">€39.50</span>
+                    </div>
+                    <div class="flex justify-between font-body-md text-on-surface-variant">
+                        <span>IVA (21%)</span>
+                        <span class="font-data-mono">€8.30</span>
+                    </div>
+                    <div class="flex justify-between font-body-md text-tertiary">
+                        <span>Descuento (Promo Web)</span>
+                        <span class="font-data-mono">-€5.00</span>
+                    </div>
+                    <div class="flex justify-between font-headline-lg text-headline-lg border-t border-outline-variant pt-md mt-md">
+                        <span>Total</span>
+                        <span class="text-primary font-bold">€42.80</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm flex-1">
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-lg font-bold">Método de Pago</h3>
+                
+                <div class="grid grid-cols-3 gap-md mb-xl">
+                    <button class="payment-btn flex flex-col items-center gap-sm p-md border-2 border-primary bg-secondary-container/20 rounded-xl transition-all" onclick="selectPayment(this)">
+                        <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">payments</span>
+                        <span class="font-label-caps text-label-caps uppercase text-primary font-bold">Efectivo</span>
+                    </button>
+                    <button class="payment-btn flex flex-col items-center gap-sm p-md border border-outline-variant rounded-xl hover:border-primary transition-all" onclick="selectPayment(this)">
+                        <span class="material-symbols-outlined text-on-surface-variant">credit_card</span>
+                        <span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Tarjeta</span>
+                    </button>
+                    <button class="payment-btn flex flex-col items-center gap-sm p-md border border-outline-variant rounded-xl hover:border-primary transition-all" onclick="selectPayment(this)">
+                        <span class="material-symbols-outlined text-on-surface-variant">qr_code_2</span>
+                        <span class="font-label-caps text-label-caps uppercase text-on-surface-variant">QR Pago</span>
+                    </button>
+                </div>
+                
+                <div class="flex flex-col gap-lg">
+                    <button class="w-full bg-primary text-on-primary font-headline-md py-lg rounded-lg shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-md font-bold">
+                        <span class="material-symbols-outlined">receipt</span>
+                        Generar Factura
+                    </button>
+                    <button class="w-full border border-primary text-primary font-headline-md py-md rounded-lg hover:bg-primary/5 transition-all font-bold">
+                        Cancelar Transacción
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</main>
+<script>
+        function selectPayment(element) {
+            // Remove active classes from all buttons
+            document.querySelectorAll('.payment-btn').forEach(btn => {
+                btn.classList.remove('border-2', 'border-primary', 'bg-secondary-container/20');
+                btn.classList.add('border', 'border-outline-variant');
+                btn.querySelector('span:first-child').classList.remove('text-primary');
+                btn.querySelector('span:first-child').style.fontVariationSettings = "'FILL' 0";
+                btn.querySelector('span:last-child').classList.remove('text-primary');
+            });
+
+            // Add active classes to selected button
+            element.classList.remove('border', 'border-outline-variant');
+            element.classList.add('border-2', 'border-primary', 'bg-secondary-container/20');
+            element.querySelector('span:first-child').classList.add('text-primary');
+            element.querySelector('span:first-child').style.fontVariationSettings = "'FILL' 1";
+            element.querySelector('span:last-child').classList.add('text-primary');
+        }
+
+        // Simple Tab Logic
+        const tabNew = document.getElementById('tab-new');
+        const tabExisting = document.getElementById('tab-existing');
+
+        tabExisting.addEventListener('click', () => {
+            tabExisting.className = 'px-xl py-md font-headline-md text-headline-md text-primary border-b-2 border-primary transition-all duration-200';
+            tabNew.className = 'px-xl py-md font-headline-md text-headline-md text-on-surface-variant hover:text-primary transition-all duration-200';
+        });
+
+        tabNew.addEventListener('click', () => {
+            tabNew.className = 'px-xl py-md font-headline-md text-headline-md text-primary border-b-2 border-primary transition-all duration-200';
+            tabExisting.className = 'px-xl py-md font-headline-md text-headline-md text-on-surface-variant hover:text-primary transition-all duration-200';
+        });
+</script>

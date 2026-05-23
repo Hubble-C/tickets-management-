@@ -18,6 +18,15 @@ namespace tickets_management.Controllers
         }
 
         [HttpGet]
+        public IActionResult Orders()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        
+        
+        [HttpGet]
         public IActionResult Logout()
         {
             return RedirectToAction("Login");
@@ -61,6 +70,11 @@ namespace tickets_management.Controllers
             ViewData["Subtotal"] = subtotal;
             ViewData["ServiceFee"] = serviceFee;
             ViewData["Total"] = total;
+            return View();
+        }
+        
+        public IActionResult Seats()
+        {
             return View();
         }
     }

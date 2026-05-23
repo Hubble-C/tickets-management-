@@ -1,0 +1,258 @@
+<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex flex-col py-xl z-20">
+    <div class="px-md mb-xl">
+        <h1 class="font-headline-md text-headline-md font-bold text-primary">CinePOS</h1>
+        <p class="text-on-surface-variant font-label-caps text-label-caps opacity-70">Terminal 01 - Main Lobby</p>
+    </div>
+    
+    <nav class="flex-1 space-y-xs">
+        <div class="flex items-center gap-md px-md py-sm bg-secondary-container text-on-secondary-container border-r-4 border-primary font-bold transition-all duration-150 cursor-pointer">
+            <span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+            <span class="font-body-md text-body-md">Events</span>
+        </div>
+        <div class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer">
+            <span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+            <span class="font-body-md text-body-md">Orders</span>
+        </div>
+        <div class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer">
+            <span class="material-symbols-outlined" data-icon="group">group</span>
+            <span class="font-body-md text-body-md">Customers</span>
+        </div>
+        <div class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer">
+            <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+            <span class="font-body-md text-body-md">Reports</span>
+        </div>
+    </nav>
+
+    <div class="px-md mt-auto pt-lg">
+        <button class="w-full bg-primary text-on-primary py-sm rounded-lg font-bold flex items-center justify-center gap-xs hover:opacity-90 active:scale-[0.98] transition-all">
+            <span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+            New Transaction
+        </button>
+        <div class="mt-md flex items-center gap-sm p-sm rounded-lg hover:bg-surface-container-high cursor-pointer">
+            <img alt="Cashier Portrait" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5vrVF1eYC992Gzt6Au88Cr5bX7oVyo4G7F1efRPezzbXqmUYgBEs1injblzmxyKLkV7T8TdhJR3c8aKXyQE5HTY7AszhaTSO0ZZTx6FoNhrcsLXvq89i9hy26YFJ_s8U0dFow2TDdixLXvmt1jltK0-EBGiikvlyjtCFplAXXTRMpO1mS9zgQZu3Zm6u0UGtblj9vf9nrFdeeAndrqGwbd7Yc93KYT2KsbS2g4yVJj1xu-4C-l71fp84NIvUXkQREpI9psm6jQJCs"/>
+            <div>
+                <p class="font-bold text-on-surface text-body-md leading-none">Alex Rivers</p>
+                <p class="text-on-surface-variant text-[11px] font-label-caps">CASHIER</p>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-surface border-b border-outline-variant flex justify-between items-center px-lg z-10">
+    <div class="flex items-center gap-xl">
+        <h2 class="font-headline-md text-headline-md font-bold text-primary">Box Office Central</h2>
+        <div class="relative w-80">
+            <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+            <input class="w-full bg-surface-container-low border-none rounded-full pl-xl py-1 text-body-md focus:ring-2 focus:ring-primary/20" placeholder="Search movies, tickets..." type="text"/>
+        </div>
+    </div>
+    <div class="flex items-center gap-lg">
+        <button class="flex items-center gap-xs text-on-surface-variant hover:text-primary transition-colors font-label-caps text-label-caps">
+            <span class="material-symbols-outlined text-[20px]" data-icon="history">history</span>
+            Shift Summary
+        </button>
+        <div class="flex items-center gap-md">
+            <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-secondary-container/50 p-xs rounded-full" data-icon="notifications">notifications</span>
+            <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-secondary-container/50 p-xs rounded-full" data-icon="help_outline">help_outline</span>
+        </div>
+    </div>
+</header>
+
+<main class="ml-64 pt-16 h-screen flex">
+    <section class="flex-1 overflow-hidden flex flex-col bg-surface-container-lowest">
+        <div class="px-xl py-lg bg-surface-container-low border-b border-outline-variant">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="font-headline-lg text-headline-lg text-on-surface">Hamlet: El Príncipe de Dinamarca</h3>
+                    <div class="flex gap-lg mt-xs text-on-surface-variant">
+                        <span class="flex items-center gap-xs font-body-md">
+                            <span class="material-symbols-outlined text-[18px]" data-icon="calendar_today">calendar_today</span>
+                            Viernes, 14 Jun • 19:30
+                        </span>
+                        <span class="flex items-center gap-xs font-body-md">
+                            <span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+                            Teatro Nacional de San Salvador
+                        </span>
+                    </div>
+                </div>
+                <div class="flex gap-md">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-label-caps text-on-surface-variant opacity-70 uppercase">Categoría</label>
+                        <select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md focus:ring-2 focus:ring-primary/20 min-w-[140px]">
+                            <option>Todas</option>
+                            <option>VIP</option>
+                            <option>General</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-label-caps text-on-surface-variant opacity-70 uppercase">Sección</label>
+                        <select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md focus:ring-2 focus:ring-primary/20 min-w-[140px]">
+                            <option>Platea Baja</option>
+                            <option>Platea Alta</option>
+                            <option>Palcos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-auto p-xl flex flex-col items-center">
+            <div class="w-full max-w-5xl">
+                <div class="w-full h-10 bg-secondary rounded-b-3xl flex items-center justify-center mb-xl shadow-md relative stage-curve overflow-hidden">
+                    <span class="text-on-primary font-label-caps text-label-caps tracking-[0.3em] uppercase">Escenario / Stage</span>
+                    <div class="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent"></div>
+                </div>
+
+                <div class="flex justify-center gap-lg mb-xl border-b border-outline-variant pb-md">
+                    <div class="flex items-center gap-sm">
+                        <div class="w-4 h-4 rounded-xs bg-surface-container border border-outline-variant"></div>
+                        <span class="text-label-caps font-label-caps">DISPONIBLE</span>
+                    </div>
+                    <div class="flex items-center gap-sm">
+                        <div class="w-4 h-4 rounded-xs bg-primary"></div>
+                        <span class="text-label-caps font-label-caps">SELECCIONADO</span>
+                    </div>
+                    <div class="flex items-center gap-sm opacity-50">
+                        <div class="w-4 h-4 rounded-xs bg-outline-variant flex items-center justify-center text-[10px] text-white">X</div>
+                        <span class="text-label-caps font-label-caps">OCUPADO</span>
+                    </div>
+                    <div class="h-4 w-[1px] bg-outline-variant mx-xs"></div>
+                    <div class="flex items-center gap-sm">
+                        <div class="w-4 h-4 rounded-xs bg-tertiary"></div>
+                        <span class="text-label-caps font-label-caps">VIP ($110)</span>
+                    </div>
+                    <div class="flex items-center gap-sm">
+                        <div class="w-4 h-4 rounded-xs bg-primary-container"></div>
+                        <span class="text-label-caps font-label-caps">GENERAL ($65)</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-sm items-center py-lg bg-surface-container-low/30 rounded-xl border border-dashed border-outline-variant">
+                    <p class="font-label-caps text-label-caps text-on-surface-variant mb-lg uppercase tracking-widest">Platea Baja</p>
+                    <div class="flex flex-col gap-xs">
+                        <script>
+                            const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+                            document.write(rows.map(row => `
+                                <div class="flex items-center gap-md">
+                                    <span class="w-6 text-right font-data-mono text-on-surface-variant/60">${row}</span>
+                                    <div class="seat-grid">
+                                        ${Array(20).fill(0).map((_, i) => {
+                                            const isOccupied = Math.random() < 0.25;
+                                            const isVip = ['A', 'B', 'C'].includes(row);
+                                            const seatClass = isOccupied 
+                                                ? 'bg-outline-variant text-white cursor-not-allowed pointer-events-none' 
+                                                : isVip 
+                                                    ? 'bg-surface-container text-tertiary border border-tertiary/20 hover:ring-2 hover:ring-tertiary/50' 
+                                                    : 'bg-surface-container text-primary border border-primary/20 hover:ring-2 hover:ring-primary/50';
+                                            return `
+                                                <button class="seat-btn w-6 h-6 rounded-xs transition-all flex items-center justify-center font-data-mono text-[10px] ${seatClass}">
+                                                    ${isOccupied ? 'X' : i + 1}
+                                                </button>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                    <span class="w-6 text-left font-data-mono text-on-surface-variant/60">${row}</span>
+                                </div>
+                            `).join(''));
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <aside class="w-96 bg-surface border-l border-outline-variant flex flex-col p-lg shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.05)] z-10">
+        <div class="mb-lg">
+            <h4 class="font-headline-md text-headline-md text-on-surface mb-md">Resumen de Orden</h4>
+            <div class="bg-surface-container-high/50 rounded-lg p-md border border-outline-variant">
+                <p class="font-bold text-primary">Detalles de la sesión</p>
+                <p class="text-body-md text-on-surface-variant">Hamlet: El Príncipe de Dinamarca</p>
+                <p class="text-label-caps font-label-caps mt-xs">Platea Baja • 14 Jun 19:30</p>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto pr-xs">
+            <div class="flex items-center justify-between mb-md">
+                <h4 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Boletos Seleccionados (2)</h4>
+                <button class="text-primary font-label-caps text-label-caps hover:underline">Limpiar</button>
+            </div>
+            
+            <div class="space-y-sm">
+                <div class="p-md rounded-lg bg-surface-container-lowest border border-outline-variant flex items-center justify-between group hover:border-primary transition-colors">
+                    <div class="flex items-center gap-md">
+                        <div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
+                            <span class="material-symbols-outlined" data-icon="stars">stars</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-on-surface">Asiento B-12</p>
+                            <p class="text-label-caps font-label-caps text-tertiary">ZONA VIP</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-data-mono font-bold">$110.00</p>
+                        <button class="text-error opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-md rounded-lg bg-surface-container-lowest border border-outline-variant flex items-center justify-between group hover:border-primary transition-colors">
+                    <div class="flex items-center gap-md">
+                        <div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
+                            <span class="material-symbols-outlined" data-icon="stars">stars</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-on-surface">Asiento B-13</p>
+                            <p class="text-label-caps font-label-caps text-tertiary">ZONA VIP</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-data-mono font-bold">$110.00</p>
+                        <button class="text-error opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-lg pt-lg border-t border-outline-variant border-dashed">
+            <div class="space-y-xs mb-lg">
+                <div class="flex justify-between items-center text-on-surface-variant font-body-md">
+                    <span>Subtotal</span>
+                    <span class="font-data-mono">$220.00</span>
+                </div>
+                <div class="flex justify-between items-center text-on-surface-variant font-body-md">
+                    <span>Cargos por servicio</span>
+                    <span class="font-data-mono">$15.40</span>
+                </div>
+                <div class="flex justify-between items-center pt-sm">
+                    <span class="text-headline-md font-headline-md">Total</span>
+                    <span class="text-headline-md font-headline-md text-primary">$235.40</span>
+                </div>
+            </div>
+            <button class="w-full bg-primary text-on-primary h-14 rounded-lg font-bold text-headline-md flex items-center justify-center gap-md hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
+                Continuar
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+            </button>
+        </div>
+    </aside>
+</main>
+
+<script>
+    // Simplified interactivity for demonstration
+    document.querySelectorAll('.seat-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (this.classList.contains('bg-primary')) {
+                // Deselect logic
+                this.classList.remove('bg-primary', 'text-on-primary', 'ring-2', 'ring-primary', 'scale-110');
+                if (this.innerText < 10) { 
+                   // could restore original classes based on row
+                }
+            } else {
+                // Select logic
+                this.classList.add('bg-primary', 'text-on-primary', 'ring-2', 'ring-primary', 'scale-110');
+            }
+        });
+    });
+</script>
