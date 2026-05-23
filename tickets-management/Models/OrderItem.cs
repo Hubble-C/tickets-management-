@@ -6,6 +6,8 @@ public class OrderItem : BaseEntity
 {
     public int Quantity { get; set; }
     public decimal PriceTicket { get; set; }
+    public decimal SubTotal { get; set; }
+    public decimal Fee { get; set; }
     public decimal Total { get; set; }
     public Order Order { get; set; }
     public int OrderId { get; set; }

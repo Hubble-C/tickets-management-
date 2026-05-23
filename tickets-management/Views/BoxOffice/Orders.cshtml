@@ -1,4 +1,5 @@
-<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex flex-col py-xl">
+<form asp-controller="BoxOffice" asp-action="Checkout" method="post">
+    <aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex flex-col py-xl">
     <div class="px-lg mb-xl">
         <h1 class="font-headline-md text-headline-md font-bold text-primary">CinePOS</h1>
         <p class="text-on-surface-variant font-body-md text-sm opacity-70">Terminal 01 - Main Lobby</p>
@@ -6,7 +7,7 @@
     
     <nav class="flex-1 space-y-xs">
         <div class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer rounded-lg">
-            <a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high transition-colors group" asp-controller="BoxOffice" asp-action="Orders">
+            <a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high transition-colors group" asp-controller="BoxOffice" asp-action="Pos">
                 <span class="material-symbols-outlined">receipt_long</span>
                 <span class="text-sm">Events</span>
             </a>
@@ -20,10 +21,12 @@
     </nav>
     
     <div class="mt-auto px-md">
-        <button class="w-full bg-primary text-on-primary py-md rounded-lg font-bold flex items-center justify-center gap-sm hover:opacity-90 transition-all">
-            <span class="material-symbols-outlined">add</span>
-            New Transaction
-        </button>
+        <a asp-action="Pos" asp-controller="BoxOffice">
+            <button class="w-full bg-primary text-on-primary py-md rounded-lg font-bold flex items-center justify-center gap-sm hover:opacity-90 transition-all">
+                <span class="material-symbols-outlined">add</span>
+                New Transaction
+            </button>
+        </a>
         <div class="mt-lg pt-lg border-t border-outline-variant flex items-center gap-sm">
             <img alt="Cashier Portrait" class="w-10 h-10 rounded-full bg-surface-container-high" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0XtId4L4OQXZZKvz5aj5ryVSFvzPFC2_xC-zmDbKE_qCL8qFYFa3IbJipCPzugdmlt8I86_u8ShGQOCIAeEUXWoVJf8CMd5QYBSKCAPAFsJw5kjM3lEgmmF2N6s3jz6gfuuJvmtwl4gYaHm7Uy1rBbTeQ9bjQYd9fn3DNwUoElv1gQwMmPTnfeai9koecgzG3jAuDugq-QiqDOWSqOYxwKbuYGyY3hupbKu8tN2ps4J_QOYeAExTiBQZAqa6AybwEJ765RKX3YvPE"/>
             <div>
@@ -109,79 +112,10 @@
             </div>
         </div>
         
-        <div class="col-span-5 flex flex-col gap-lg">
-            <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm">
-                <h3 class="font-headline-md text-headline-md text-on-surface mb-lg font-bold">Resumen del Pedido</h3>
-                
-                <div class="space-y-md mb-xl">
-                    <div class="flex justify-between items-center py-sm border-b border-outline-variant border-dashed">
-                        <div>
-                            <p class="font-body-lg font-bold">2x Entrada Adulto - IMAX</p>
-                            <p class="text-xs text-on-surface-variant">Fila H, Asientos 12, 13</p>
-                        </div>
-                        <p class="font-data-mono text-data-mono">€24.00</p>
-                    </div>
-                    <div class="flex justify-between items-center py-sm border-b border-outline-variant border-dashed">
-                        <div>
-                            <p class="font-body-lg font-bold">1x Combo Familiar</p>
-                            <p class="text-xs text-on-surface-variant">Palomitas G + 2 Bebidas</p>
-                        </div>
-                        <p class="font-data-mono text-data-mono">€15.50</p>
-                    </div>
-                </div>
-                
-                <div class="space-y-sm">
-                    <div class="flex justify-between font-body-md text-on-surface-variant">
-                        <span>Subtotal</span>
-                        <span class="font-data-mono">€39.50</span>
-                    </div>
-                    <div class="flex justify-between font-body-md text-on-surface-variant">
-                        <span>IVA (21%)</span>
-                        <span class="font-data-mono">€8.30</span>
-                    </div>
-                    <div class="flex justify-between font-body-md text-tertiary">
-                        <span>Descuento (Promo Web)</span>
-                        <span class="font-data-mono">-€5.00</span>
-                    </div>
-                    <div class="flex justify-between font-headline-lg text-headline-lg border-t border-outline-variant pt-md mt-md">
-                        <span>Total</span>
-                        <span class="text-primary font-bold">€42.80</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm flex-1">
-                <h3 class="font-headline-md text-headline-md text-on-surface mb-lg font-bold">Método de Pago</h3>
-                
-                <div class="grid grid-cols-3 gap-md mb-xl">
-                    <button class="payment-btn flex flex-col items-center gap-sm p-md border-2 border-primary bg-secondary-container/20 rounded-xl transition-all" onclick="selectPayment(this)">
-                        <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">payments</span>
-                        <span class="font-label-caps text-label-caps uppercase text-primary font-bold">Efectivo</span>
-                    </button>
-                    <button class="payment-btn flex flex-col items-center gap-sm p-md border border-outline-variant rounded-xl hover:border-primary transition-all" onclick="selectPayment(this)">
-                        <span class="material-symbols-outlined text-on-surface-variant">credit_card</span>
-                        <span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Tarjeta</span>
-                    </button>
-                    <button class="payment-btn flex flex-col items-center gap-sm p-md border border-outline-variant rounded-xl hover:border-primary transition-all" onclick="selectPayment(this)">
-                        <span class="material-symbols-outlined text-on-surface-variant">qr_code_2</span>
-                        <span class="font-label-caps text-label-caps uppercase text-on-surface-variant">QR Pago</span>
-                    </button>
-                </div>
-                
-                <div class="flex flex-col gap-lg">
-                    <button class="w-full bg-primary text-on-primary font-headline-md py-lg rounded-lg shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-md font-bold">
-                        <span class="material-symbols-outlined">receipt</span>
-                        Generar Factura
-                    </button>
-                    <button class="w-full border border-primary text-primary font-headline-md py-md rounded-lg hover:bg-primary/5 transition-all font-bold">
-                        Cancelar Transacción
-                    </button>
-                </div>
-            </div>
-        </div>
-        
+        <partial name="_ResumenPedido" model="Model"/>
     </div>
 </main>
+</form>
 <script>
         function selectPayment(element) {
             // Remove active classes from all buttons

@@ -1,0 +1,70 @@
+<div class="col-span-5 flex flex-col gap-lg" id="contenedor-resumen">
+            <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm">
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-lg font-bold">Resumen del Pedido</h3>
+                
+                <div class="space-y-md mb-xl">
+                    <div class="flex justify-between items-center py-sm border-b border-outline-variant border-dashed">
+                        <div>
+                            <p class="font-body-lg font-bold">2x Entrada Adulto - IMAX</p>
+                            <p class="text-xs text-on-surface-variant">Fila H, Asientos 12, 13</p>
+                        </div>
+                        <p class="font-data-mono text-data-mono">€24.00</p>
+                    </div>
+                    <div class="flex justify-between items-center py-sm border-b border-outline-variant border-dashed">
+                        <div>
+                            <p class="font-body-lg font-bold">1x Combo Familiar</p>
+                            <p class="text-xs text-on-surface-variant">Palomitas G + 2 Bebidas</p>
+                        </div>
+                        <p class="font-data-mono text-data-mono">€15.50</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-sm">
+                    <div class="flex justify-between font-body-md text-on-surface-variant">
+                        <span>Subtotal</span>
+                        <span class="font-data-mono">€39.50</span>
+                    </div>
+                    <div class="flex justify-between font-body-md text-on-surface-variant">
+                        <span>IVA (21%)</span>
+                        <span class="font-data-mono">€8.30</span>
+                    </div>
+                    <div class="flex justify-between font-body-md text-tertiary">
+                        <span>Descuento (Promo Web)</span>
+                        <span class="font-data-mono">-€5.00</span>
+                    </div>
+                    <div class="flex justify-between font-headline-lg text-headline-lg border-t border-outline-variant pt-md mt-md">
+                        <span>Total</span>
+                        <span class="text-primary font-bold">€42.80</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm flex-1">
+                <h3 class="font-headline-md text-headline-md text-on-surface mb-lg font-bold">Método de Pago</h3>
+                
+                <div class="grid grid-cols-3 gap-md mb-xl">
+                    <button class="payment-btn flex flex-col items-center gap-sm p-md border-2 border-primary bg-secondary-container/20 rounded-xl transition-all" onclick="selectPayment(this)">
+                        <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">payments</span>
+                        <span class="font-label-caps text-label-caps uppercase text-primary font-bold">Efectivo</span>
+                    </button>
+                    <button class="payment-btn flex flex-col items-center gap-sm p-md border border-outline-variant rounded-xl hover:border-primary transition-all" onclick="selectPayment(this)">
+                        <span class="material-symbols-outlined text-on-surface-variant">credit_card</span>
+                        <span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Tarjeta</span>
+                    </button>
+                    <button class="payment-btn flex flex-col items-center gap-sm p-md border border-outline-variant rounded-xl hover:border-primary transition-all" onclick="selectPayment(this)">
+                        <span class="material-symbols-outlined text-on-surface-variant">qr_code_2</span>
+                        <span class="font-label-caps text-label-caps uppercase text-on-surface-variant">QR Pago</span>
+                    </button>
+                </div>
+                
+                <div class="flex flex-col gap-lg">
+                    <button class="w-full bg-primary text-on-primary font-headline-md py-lg rounded-lg shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-md font-bold">
+                        <span class="material-symbols-outlined">receipt</span>
+                        Generar Factura
+                    </button>
+                    <button class="w-full border border-primary text-primary font-headline-md py-md rounded-lg hover:bg-primary/5 transition-all font-bold">
+                        Cancelar Transacción
+                    </button>
+                </div>
+            </div>
+        </div>
