@@ -27,9 +27,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("pedrito1234567!")),
-        ValidateIssuer = false,
-        ValidateAudience = false
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Jwt:Secret")),
+        ValidateIssuer = true,
+        ValidIssuer = "ticket-admin",
+        ValidateAudience = true,
+        ValidAudience = "ticket-internal",
+        
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero,
+        
+        RoleClaimType = "role"
     };
 
 });
