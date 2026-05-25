@@ -5,5 +5,6 @@ public enum TypePayment
     Cash,
     CreditCard,
     Pse,
-    Efecty
+    Efecty,
+    QRCode
 }

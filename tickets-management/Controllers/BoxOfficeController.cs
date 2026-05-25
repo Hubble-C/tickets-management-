@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using tickets_management.Models.ViewModels;
+using tickets_management.Enums;
 
 namespace tickets_management.Controllers
 {
@@ -20,7 +22,17 @@ namespace tickets_management.Controllers
         [HttpGet]
         public IActionResult Orders()
         {
-            return View();
+            var resumenInicial = new OrderSumary
+            {
+                Subtotal = 0,
+                Tax = 0,
+                Discount = 0,
+                Total = 0,
+                TypePayment = TypePayment.Cash,
+                CartSummaries = new List<CartSummary>()
+            };
+
+            return View(resumenInicial);
         }
 
         [HttpPost]

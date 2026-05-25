@@ -1,0 +1,151 @@
+@using tickets_management.Enums
+@model tickets_management.Models.ViewModels.OrderSumary
+
+
+
+<div class="flex flex-col gap-lg w-full">
+
+
+    <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm w-full">
+        <h3 class="font-headline-md text-headline-md text-on-surface mb-lg font-bold">Resumen del Pedido</h3>
+
+        <div class="space-y-md mb-xl">
+            @if (Model.CartSummaries != null && Model.CartSummaries.Any())
+            {
+            @foreach (var item in Model.CartSummaries)
+            {
+            <div class="flex justify-between items-center py-sm border-b border-outline-variant border-dashed">
+                <div>
+                    <p class="font-body-lg font-bold"> @item.Quantity X @item.Concept</p>
+                    <p class="text-xs text-on-surface-variant">@item.SeatsDetail</p>
+                </div>
+                <p class="font-data-mono text-data-mono">@item.LineTotal.ToString("C")</p>
+            </div>
+            }
+            }
+            else
+            {
+            <div class="text-center py-xl text-on-surface-variant opacity-60">
+                <span class="material-symbols-outlined text-3xl mb-xs">shopping_cart</span>
+                <p class="text-sm">No hay productos en el pedido</p>
+            </div>
+            }
+        </div>
+
+        <div class="space-y-sm">
+            <div class="flex justify-between font-body-md text-on-surface-variant">
+                <span>Subtotal</span>
+                <span class="font-data-mono">@Model.Subtotal.ToString("C")</span>
+            </div>
+            <div class="flex justify-between font-body-md text-on-surface-variant">
+                <span>IVA (21%)</span>
+                <span class="font-data-mono">@Model.Tax.ToString("C")</span>
+            </div>
+            <div class="flex justify-between font-body-md text-tertiary">
+                <span>Descuento (Promo Web)</span>
+                <span class="font-data-mono">-@Model.Discount.ToString("C")</span>
+            </div>
+            <div class="flex justify-between font-headline-lg text-headline-lg border-t border-outline-variant pt-md mt-md">
+                <span>Total</span>
+                <span class="text-primary font-bold">@Model.Total.ToString("C")</span>
+            </div>
+        </div>
+    </div>
+
+    @* --- TARJETA 2: MÉTODO DE PAGO --- *@
+    <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm w-full">
+        <h3 class="font-headline-md text-headline-md text-on-surface mb-lg font-bold">Método de Pago</h3>
+        <input type="hidden" name="TypePayment" id="selected-payment-method" value="@Model.TypePayment">
+
+        <div class="grid grid-cols-3 gap-md mb-xl">
+            @{
+            var isCash = Model.TypePayment == TypePayment.Cash;
+            var cashClass = isCash ? "border-2 border-primary bg-secondary-container/20" : "border border-outline-variant hover:border-primary";
+            var cashIconClass = isCash ? "text-primary" : "text-on-surface-variant";
+            var cashTextClass = isCash ? "text-primary font-bold" : "text-on-surface-variant";
+            var cashFill = isCash ? "'FILL' 1" : "'FILL' 0";
+            }
+            <button type="button" class="payment-btn flex flex-col items-center gap-sm p-md rounded-xl transition-all @cashClass" data-provider="Cash" onclick="selectPayment(this)">
+                <span class="material-symbols-outlined @cashIconClass" style="font-variation-settings: @cashFill;">payments</span>
+                <span class="font-label-caps text-label-caps text-sm uppercase @cashTextClass">Efectivo</span>
+            </button>
+
+            @{
+            var isCard = Model.TypePayment == TypePayment.CreditCard;
+            var cardClass = isCard ? "border-2 border-primary bg-secondary-container/20" : "border border-outline-variant hover:border-primary";
+            var cardIconClass = isCard ? "text-primary" : "text-on-surface-variant";
+            var cardTextClass = isCard ? "text-primary font-bold" : "text-on-surface-variant";
+            var cardFill = isCard ? "'FILL' 1" : "'FILL' 0";
+            }
+            <button type="button" class="payment-btn flex flex-col items-center gap-sm p-md rounded-xl transition-all @cardClass" data-provider="CreditCard" onclick="selectPayment(this)">
+                <span class="material-symbols-outlined @cardIconClass" style="font-variation-settings: @cardFill;">credit_card</span>
+                <span class="font-label-caps text-label-caps text-sm uppercase @cardTextClass">Tarjeta</span>
+            </button>
+
+            @{
+            var isQr = Model.TypePayment == TypePayment.QRCode;
+            var qrClass = isQr ? "border-2 border-primary bg-secondary-container/20" : "border border-outline-variant hover:border-primary";
+            var qrIconClass = isQr ? "text-primary" : "text-on-surface-variant";
+            var qrTextClass = isQr ? "text-primary font-bold" : "text-on-surface-variant";
+            var qrFill = isQr ? "'FILL' 1" : "'FILL' 0";
+            }
+            <button type="button" class="payment-btn flex flex-col items-center gap-sm p-md rounded-xl transition-all @qrClass" data-provider="QRCode" onclick="selectPayment(this)">
+                <span class="material-symbols-outlined @qrIconClass" style="font-variation-settings: @qrFill;">qr_code_2</span>
+                <span class="font-label-caps text-label-caps text-sm uppercase @qrTextClass">QR Pago</span>
+            </button>
+        </div>
+
+        <div class="flex flex-col gap-md">
+            <button type="submit" class="w-full bg-primary text-on-primary font-headline-md py-lg rounded-lg shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-md font-bold">
+                <span class="material-symbols-outlined">receipt</span>
+                Generar Factura
+            </button>
+            <a asp-action="Pos" asp-controller="BoxOffice">
+                <button type="button" class="w-full border border-primary text-primary font-headline-md py-md rounded-lg hover:bg-primary/5 transition-all font-bold">
+                    Cancelar Transacción
+                </button>
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Se mantiene intacto tu script asíncrono
+    function selectPayment(elementoBoton) {
+        const metodoSeleccionado = elementoBoton.getAttribute('data-provider');
+
+        const inputOculto = document.getElementById('selected-payment-method');
+        if (inputOculto) {
+            inputOculto.value = metodoSeleccionado;
+        }
+
+        const formulario = document.getElementById('form-pos');
+        if (!formulario) {
+            console.error("No se encontró el formulario con el ID 'form-pos' en la vista padre.");
+            return;
+        }
+
+        const datosFormulario = new FormData(formulario);
+
+        fetch('/BoxOffice/CalcularResumen', {
+            method: 'POST',
+            body: datosFormulario
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error en la respuesta del servidor");
+                }
+                return response.text();
+            })
+            .then(htmlFresco => {
+                const contenedor = document.getElementById('contenedor-resumen');
+                if (contenedor) {
+                    contenedor.innerHTML = htmlFresco;
+                }
+            })
+            .catch(error => {
+                console.error("Error en la sincronización del POS:", error);
+            });
+    }
+</script>

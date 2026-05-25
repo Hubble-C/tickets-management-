@@ -1,3 +1,6 @@
+@using tickets_management.Enums
+@model tickets_management.Models.ViewModels.OrderSumary
+
 <form asp-controller="BoxOffice" asp-action="Checkout" method="post">
     <aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex flex-col py-xl">
     <div class="px-lg mb-xl">
@@ -112,7 +115,9 @@
             </div>
         </div>
         
-        <partial name="_ResumenPedido" model="Model"/>
+        <div class="col-span-5 flex flex-col gap-lg" id="contenedor-resumen">
+            <partial name="_ResumenPedido" model="Model"/>
+        </div>
     </div>
 </main>
 </form>
