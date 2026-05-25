@@ -11,11 +11,9 @@ namespace tickets_management.Services;
 public class LoginService : ILogin
 {
     private readonly IDbConnection _dbAuthConnection;
-    private readonly MySqlDbContext _context;
     
-    public LoginService(IDbConnection dbAuthConnection, MySqlDbContext context)
+    public LoginService(IDbConnection dbAuthConnection)
     {
-        _context = context;
         _dbAuthConnection = dbAuthConnection;
     }
 
