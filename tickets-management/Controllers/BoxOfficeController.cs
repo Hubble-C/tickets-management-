@@ -1,21 +1,26 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using tickets_management.Models.ViewModels;
 using tickets_management.Enums;
 
 namespace tickets_management.Controllers
 {
+    [Authorize(Roles = "Seller")]
     public class BoxOfficeController : Controller
     {
+        
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
         }
-
+        
+        [AllowAnonymous]
         [HttpPost]
-        public IActionResult Login(string employeeId, string pin)
+        public IActionResult Login(string username, string password)
         {
-            // Redirección directa al punto de venta (POS)
+            
             return RedirectToAction("Pos");
         }
 
@@ -35,7 +40,7 @@ namespace tickets_management.Controllers
             return View(resumenInicial);
         }
 
-        [HttpPost]
+ 
         
         
         [HttpGet]
@@ -53,7 +58,7 @@ namespace tickets_management.Controllers
         [HttpPost]
         public IActionResult Checkout(int showId, List<string> seats, string customerEmail, string paymentMethod)
         {
-            // Pasar variables de simulación directamente a la vista de impresión
+           
             var orderNum = $"TKT-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(100, 999)}";
             return RedirectToAction("PrintTicket", new { 
                 orderNumber = orderNum,

@@ -2,6 +2,9 @@ using System.Data;
 using MySqlConnector;
 using tickets_management.Services;
 using tickets_management.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +22,17 @@ builder.Services.AddSession(options =>
 
 var AuthConnectionString = builder.Configuration.GetConnectionString("DbAuthConnection");
 builder.Services.AddTransient<IDbConnection>(sp => new MySqlConnection(AuthConnectionString));
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("pedrito1234567!")),
+        ValidateIssuer = false,
+        ValidateAudience = false
+    };
 
+});
 
 var app = builder.Build();
 
@@ -34,7 +47,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
-app.UseAuthorization();
+
 
 app.UseSession();
 
