@@ -2,12 +2,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using tickets_management.Models.ViewModels;
 using tickets_management.Enums;
+using tickets_management.Services.Interfaces;
 
 namespace tickets_management.Controllers
 {
     [Authorize(Roles = "Seller")]
     public class BoxOfficeController : Controller
     {
+        private readonly ILogin _login;
+
+        public BoxOfficeController(ILogin login)
+        {
+            _login = login;
+        }
         
         [HttpGet]
         [AllowAnonymous]
@@ -18,10 +25,18 @@ namespace tickets_management.Controllers
         
         [AllowAnonymous]
         [HttpPost]
-        public IActionResult Login(string username, string password)
+        public async Task<IActionResult> Login(string username, string password)
         {
+            var response = await _login.Login(username, password);
             
-            return RedirectToAction("Pos");
+            if (response != null && response.Success)
+            {
+                // Token dentro de Response.data para mañana 
+                return RedirectToAction("Pos");
+            }
+            
+            ModelState.AddModelError(string.Empty, "Credenciales incorrectas o no tienes permisos de Seller.");
+            return View();
         }
 
         [HttpGet]
