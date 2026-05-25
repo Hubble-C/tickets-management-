@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using tickets_management.Models;
+using Dapper;
 
 namespace tickets_management.Data;
 
