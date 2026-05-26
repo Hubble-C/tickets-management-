@@ -52,24 +52,48 @@ public class OrderService : IOrderService
 
         foreach (var itemDto in dto.Items)
         {
-            var SendDapper = await _catalogDb.QueryFirstOrDefaultAsync<dynamic>("SELECT Price FROM Events WHERE Id = @Id", new {Id = itemDto.EventId});
+            // The catalog (separate DB) is the source of truth for price, event and
+            // capacity; the client never gets to set the price it pays. A catalog
+            // outage surfaces as a clean failure instead of an unhandled 500.
+            CatalogTicketType? ticketType;
+            int committed;
+            try
+            {
+                ticketType = await _catalogDb.QueryFirstOrDefaultAsync<CatalogTicketType>(
+                    "SELECT Id, Price, Quantity, EventId FROM TicketTypes WHERE Id = @Id",
+                    new { Id = itemDto.TicketTypeId });
 
-            if (SendDapper == null)
-            {
-                return ServiceResponse<Order>.Fail($"Could not find an event with id {itemDto.EventId}");
-            }else if (SendDapper.Price != itemDto.PriceTicket)
-            {
-                return ServiceResponse<Order>.Fail($"Invalid Price entered {itemDto.EventId}");
+                // Tickets already committed (anything not cancelled or returned) plus the
+                // seats we are about to mint must fit the type's quantity.
+                committed = ticketType is null ? 0 : await _db.Tickets.CountAsync(
+                    t => t.OrderItem.TicketTypeId == itemDto.TicketTypeId
+                         && t.Status != TicketStatus.Cancelled
+                         && t.Status != TicketStatus.Returned,
+                    ct);
             }
-            
-            
-            
+            catch (Exception ex) when (ex is DbException or DbUpdateException)
+            {
+                return ServiceResponse<Order>.Fail($"Could not read the catalog: {ex.Message}");
+            }
+
+            if (ticketType is null)
+                return ServiceResponse<Order>.Fail(
+                    $"Could not find a ticket type with id {itemDto.TicketTypeId}.");
+            if (ticketType.Price is not decimal unitPrice)
+                return ServiceResponse<Order>.Fail(
+                    $"Ticket type {itemDto.TicketTypeId} has no price set in the catalog.");
+            if (committed + itemDto.Seats.Count > ticketType.Quantity)
+                return ServiceResponse<Order>.Fail(
+                    $"Not enough availability for ticket type {itemDto.TicketTypeId}: "
+                    + $"{Math.Max(0, ticketType.Quantity - committed)} left, {itemDto.Seats.Count} requested.");
+
             var item = new OrderItem
             {
-                EventId = itemDto.EventId,
-                PriceTicket = itemDto.PriceTicket,
+                TicketTypeId = ticketType.Id,
+                EventId = ticketType.EventId,
+                PriceTicket = unitPrice,
                 Quantity = itemDto.Seats.Count,
-                Total = itemDto.PriceTicket * itemDto.Seats.Count,
+                Total = unitPrice * itemDto.Seats.Count,
                 CreatedAt = now,
                 UpdatedAt = now,
             };
@@ -78,7 +102,7 @@ public class OrderService : IOrderService
                 item.Tickets.Add(new Ticket
                 {
                     Seat = seat,
-                    EventId = itemDto.EventId,
+                    EventId = ticketType.EventId,
                     Status = TicketStatus.Pending,
                     CreatedAt = now,
                     UpdatedAt = now,
@@ -167,6 +191,8 @@ public class OrderService : IOrderService
     private static bool IsDuplicateTicketCode(DbUpdateException ex) =>
         ex.InnerException is MySqlException { ErrorCode: MySqlErrorCode.DuplicateKeyEntry };
 
+    private sealed record CatalogTicketType(int Id, decimal? Price, int Quantity, int EventId);
+
     public Task<ServiceResponse<Order>> MarkAsPaidAsync(int orderId, CancellationToken ct = default) =>
         TransitionAsync(orderId, OrderStatus.Paid, ct);
 
@@ -176,11 +202,6 @@ public class OrderService : IOrderService
     public Task<ServiceResponse<Order>> RejectAsync(int orderId, CancellationToken ct = default) =>
         TransitionAsync(orderId, OrderStatus.Rejected, ct);
 
-    /// <summary>
-    /// Moves the order to <paramref name="target"/> and cascades the matching
-    /// ticket transition, all inside a single database transaction so order and
-    /// tickets can never end up in inconsistent states.
-    /// </summary>
     private async Task<ServiceResponse<Order>> TransitionAsync(
         int orderId, OrderStatus target, CancellationToken ct)
     {

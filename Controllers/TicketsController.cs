@@ -4,7 +4,6 @@ using tickets_management.ViewModels;
 
 namespace tickets_management.Controllers;
 
-/// <summary>Customer-facing flows: browse the QR history of purchased tickets.</summary>
 public class TicketsController : Controller
 {
     private readonly ITicketService _tickets;
@@ -28,7 +27,7 @@ public class TicketsController : Controller
             CustomerId = id,
             Searched = true,
             Tickets = tickets
-                .Select(t => new TicketQrViewModel { Ticket = t, QrSvg = _qr.ToSvg(t.TicketCode) })
+                .Select(t => new TicketQrViewModel { Ticket = t, QrImage = _qr.ToPngDataUri(t.TicketCode) })
                 .ToList(),
         });
     }

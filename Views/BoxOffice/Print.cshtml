@@ -47,7 +47,7 @@
         }
         
         .qr { margin: 1mm auto; width: 36mm; height: 36mm; }
-        .qr svg { width: 100% !important; height: 100% !important; display: block; }
+        .qr img { width: 100% !important; height: 100% !important; display: block; image-rendering: pixelated; }
 
         .code {
             font-family: "Consolas", "Courier New", monospace;
@@ -99,7 +99,7 @@
 
             <div class="seat">Asiento @item.Ticket.Seat</div>
 
-            <div class="qr">@Html.Raw(item.QrSvg)</div>
+            <div class="qr"><img src="@item.QrImage" alt="@item.Ticket.TicketCode" /></div>
 
             <div class="code">@item.Ticket.TicketCode</div>
 

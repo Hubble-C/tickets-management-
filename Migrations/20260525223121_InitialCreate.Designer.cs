@@ -12,7 +12,7 @@ using tickets_management.Data;
 namespace tickets_management.Migrations
 {
     [DbContext(typeof(MySqlDbContext))]
-    [Migration("20260521091535_InitialCreate")]
+    [Migration("20260525223121_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -83,6 +83,9 @@ namespace tickets_management.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TicketTypeId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Total")

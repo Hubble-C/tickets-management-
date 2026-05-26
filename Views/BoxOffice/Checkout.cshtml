@@ -24,14 +24,10 @@
     </div>
 
     <div class="col-md-3">
-        <label asp-for="EventId" class="form-label"></label>
-        <input asp-for="EventId" class="form-control" />
-        <span asp-validation-for="EventId" class="text-danger"></span>
-    </div>
-    <div class="col-md-3">
-        <label asp-for="PriceTicket" class="form-label"></label>
-        <input asp-for="PriceTicket" class="form-control" />
-        <span asp-validation-for="PriceTicket" class="text-danger"></span>
+        <label asp-for="TicketTypeId" class="form-label"></label>
+        <input asp-for="TicketTypeId" class="form-control" />
+        <span asp-validation-for="TicketTypeId" class="text-danger"></span>
+        <span class="form-text">Price comes from the catalog for this ticket type.</span>
     </div>
     <div class="col-md-3">
         <label asp-for="HourAt" class="form-label"></label>

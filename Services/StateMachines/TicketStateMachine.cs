@@ -2,12 +2,6 @@ using tickets_management.Enums;
 
 namespace tickets_management.Services.StateMachines;
 
-/// <summary>
-/// Single source of truth for the ticket lifecycle. Only knows about the
-/// ticket's own status; cross-entity rules (e.g. a ticket may only be marked
-/// <see cref="TicketStatus.Used"/> while its order is paid) are enforced by the
-/// services that own both aggregates.
-/// </summary>
 public static class TicketStateMachine
 {
     private static readonly IReadOnlyDictionary<TicketStatus, TicketStatus[]> Transitions =

@@ -25,7 +25,7 @@ builder.Services.AddDbContext<MySqlDbContext>(options =>
     options.UseMySql(DbSalesConnection, new MySqlServerVersion(new Version(8, 0, 36))));
 
 var DbCatalogConnection = builder.Configuration["DB_CATALOG_CONNECTION"]
-                          ?? throw new InvalidOperationException("Connection string 'DbCatalogConnection' was not found.");
+                        ?? throw new InvalidOperationException("Connection string 'DbCatalogConnection' was not found.");
 builder.Services.AddTransient<IDbConnection>(sp => new MySqlConnection(DbCatalogConnection) );
 
 var app = builder.Build();

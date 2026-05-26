@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>tickets_management</RootNamespace>
@@ -16,27 +16,6 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="tickets-management\bin\Debug\net10.0\appsettings.Development.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\bin\Debug\net10.0\appsettings.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\bin\Debug\net10.0\tickets-management.deps.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\bin\Debug\net10.0\tickets-management.runtimeconfig.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\bin\Debug\net10.0\tickets-management.staticwebassets.endpoints.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\bin\Debug\net10.0\tickets-management.staticwebassets.runtime.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\Debug\net10.0\rbcswa.dswa.cache.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\Debug\net10.0\rjimswa.dswa.cache.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\Debug\net10.0\rjsmrazor.dswa.cache.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\Debug\net10.0\rpswa.dswa.cache.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\Debug\net10.0\staticwebassets.build.endpoints.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\Debug\net10.0\staticwebassets.build.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\Debug\net10.0\staticwebassets.development.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\Debug\net10.0\tickets-management.sourcelink.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\project.assets.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\project.packagespec.json" />
-      <_ContentIncludedByDefault Remove="tickets-management\obj\tickets-management.csproj.nuget.dgspec.json" />
     </ItemGroup>
 
 </Project>

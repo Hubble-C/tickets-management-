@@ -13,13 +13,9 @@ public class CheckoutViewModel
     [Required, StringLength(50), Display(Name = "NIT / Document")]
     public string Nit { get; set; } = string.Empty;
 
-    [Required, Display(Name = "Event Id")]
-    [Range(1, int.MaxValue, ErrorMessage = "A valid event is required.")]
-    public int EventId { get; set; }
-
-    [Range(0, 9_999_999, ErrorMessage = "Price must be zero or greater.")]
-    [DataType(DataType.Currency), Display(Name = "Price per ticket")]
-    public decimal PriceTicket { get; set; }
+    [Required, Display(Name = "Ticket type Id")]
+    [Range(1, int.MaxValue, ErrorMessage = "A valid ticket type is required.")]
+    public int TicketTypeId { get; set; }
 
     [Required, Display(Name = "Seats (comma-separated)")]
     public string Seats { get; set; } = string.Empty;

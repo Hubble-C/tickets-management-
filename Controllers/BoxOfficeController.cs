@@ -6,7 +6,6 @@ using tickets_management.ViewModels;
 
 namespace tickets_management.Controllers;
 
-/// <summary>Box-office (taquilla) flows: sell, confirm, settle and validate tickets.</summary>
 public class BoxOfficeController : Controller
 {
     private readonly IOrderService _orders;
@@ -51,8 +50,7 @@ public class BoxOfficeController : Controller
             [
                 new CreateOrderItemDto
                 {
-                    EventId = model.EventId,
-                    PriceTicket = model.PriceTicket,
+                    TicketTypeId = model.TicketTypeId,
                     Seats = seats,
                 }
             ],
@@ -124,7 +122,7 @@ public class BoxOfficeController : Controller
         var tickets = order.Items
             .SelectMany(i => i.Tickets)
             .OrderBy(t => t.Seat)
-            .Select(t => new TicketQrViewModel { Ticket = t, QrSvg = _qr.ToSvg(t.TicketCode) })
+            .Select(t => new TicketQrViewModel { Ticket = t, QrImage = _qr.ToPngDataUri(t.TicketCode) })
             .ToList();
 
         return new OrderConfirmationViewModel { Order = order, Tickets = tickets };

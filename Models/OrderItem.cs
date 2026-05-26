@@ -9,5 +9,8 @@ public class OrderItem : BaseEntity
     public int OrderId { get; set; }
     public int EventId { get; set; }
 
+    /// <summary>The catalog ticket type sold on this line; drives the unit price.</summary>
+    public int TicketTypeId { get; set; }
+
     public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }
