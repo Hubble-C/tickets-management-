@@ -23,11 +23,11 @@ builder.Services.AddSession(options =>
 var AuthConnectionString = builder.Configuration.GetConnectionString("DbAuthConnection");
 builder.Services.AddTransient<IDbConnection>(sp => new MySqlConnection(AuthConnectionString));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-{
+{   
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Jwt:Secret")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ticket-system-super-secret-key-2026!")),
         ValidateIssuer = true,
         ValidIssuer = "ticket-admin",
         ValidateAudience = true,
@@ -39,8 +39,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         RoleClaimType = "role"
     };
 
-});
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = context =>
+        {
+            context.HandleResponse();
+            context.Response.Redirect($"/BoxOffice/Login");
+            return Task.CompletedTask;
+        }
+    };
 
+});
+    
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -53,10 +63,11 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseSession();
 app.UseAuthentication();
 
 
-app.UseSession();
+
 
 app.UseAuthorization();
 

@@ -32,6 +32,9 @@ namespace tickets_management.Controllers
             if (response != null && response.Success)
             {
                 // Token dentro de Response.data para mañana 
+                HttpContext.Session.SetString("Username", username);
+                HttpContext.Session.SetString("JWToken", response.Data);
+                
                 return RedirectToAction("Pos");
             }
             
