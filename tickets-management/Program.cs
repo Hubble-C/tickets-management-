@@ -5,13 +5,15 @@ using tickets_management.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
+using tickets_management.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<ILogin, LoginService>();
-
+builder.Services.AddTransient<IPasswordHasher<AspNetUsers>, PasswordHasher<AspNetUsers>>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -41,13 +43,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
     options.Events = new JwtBearerEvents
     {
+        
         OnChallenge = context =>
         {
+            
             context.HandleResponse();
             context.Response.Redirect($"/BoxOffice/Login");
             return Task.CompletedTask;
+        },
+        OnMessageReceived = context =>
+        {
+            var token = context.HttpContext.Session.GetString("JWToken");
+            context.Token = token;
+            return Task.CompletedTask;
         }
     };
+    
 
 });
     

@@ -6,7 +6,7 @@ using tickets_management.Services.Interfaces;
 
 namespace tickets_management.Controllers
 {
-    [Authorize(Roles = "Seller")]
+    
     public class BoxOfficeController : Controller
     {
         private readonly ILogin _login;
@@ -31,9 +31,9 @@ namespace tickets_management.Controllers
             
             if (response != null && response.Success)
             {
-                // Token dentro de Response.data para mañana 
+                
                 HttpContext.Session.SetString("Username", username);
-                HttpContext.Session.SetString("JWToken", response.Data);
+                HttpContext.Session.SetString("JWToken", response.Data.Token);
                 
                 return RedirectToAction("Pos");
             }
@@ -45,6 +45,13 @@ namespace tickets_management.Controllers
         [HttpGet]
         public IActionResult Orders()
         {
+            var token = HttpContext.Session.GetString("JWToken");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");
+            }
+            
             var resumenInicial = new OrderSumary
             {
                 Subtotal = 0,
@@ -64,19 +71,32 @@ namespace tickets_management.Controllers
         [HttpGet]
         public IActionResult Logout()
         {
+            HttpContext.Session.Remove("JWToken");
             return RedirectToAction("Login");
         }
 
         [HttpGet]
         public IActionResult Pos()
         {
+            var token = HttpContext.Session.GetString("JWToken");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");
+            }
             return View();
         }
 
         [HttpPost]
         public IActionResult Checkout(int showId, List<string> seats, string customerEmail, string paymentMethod)
         {
-           
+            var token = HttpContext.Session.GetString("JWToken");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");
+            }
+            
             var orderNum = $"TKT-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(100, 999)}";
             return RedirectToAction("PrintTicket", new { 
                 orderNumber = orderNum,
@@ -95,6 +115,12 @@ namespace tickets_management.Controllers
         [HttpGet]
         public IActionResult PrintTicket(string orderNumber, string showName, string showTime, string hall, string seats, string email, string paymentMethod, string subtotal, string serviceFee, string total)
         {
+            var token = HttpContext.Session.GetString("JWToken");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");
+            }
             ViewData["OrderNumber"] = orderNumber;
             ViewData["ShowName"] = showName;
             ViewData["ShowTime"] = showTime;
