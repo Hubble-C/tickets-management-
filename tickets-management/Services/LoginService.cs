@@ -51,7 +51,7 @@ public class LoginService : ILogin
                     new Claim(ClaimTypes.Name, userExist.Username),
                     new Claim("role", "Seller"),
                 }),
-                IssuedAt = DateTime.UtcNow,        
+                IssuedAt = DateTime.UtcNow,         
                 NotBefore = DateTime.UtcNow,
                 Expires = DateTime.UtcNow.AddMinutes(30),
                 SigningCredentials = credentials
