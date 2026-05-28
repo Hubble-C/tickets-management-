@@ -11,20 +11,22 @@ public class BoxOfficeController : Controller
     private readonly IOrderService _orders;
     private readonly ITicketService _tickets;
     private readonly IQrCodeService _qr;
+    private readonly IEventCatalog _catalog;
 
-    public BoxOfficeController(IOrderService orders, ITicketService tickets, IQrCodeService qr)
+    public BoxOfficeController(IOrderService orders, ITicketService tickets, IQrCodeService qr, IEventCatalog catalog)
     {
         _orders = orders;
         _tickets = tickets;
         _qr = qr;
+        _catalog = catalog;
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Print(int id, CancellationToken ct)
     {
         var order = await _orders.GetByIdAsync(id, ct);
-        return order is null ? NotFound() : View(BuildConfirmation(order));
-    } 
+        return order is null ? NotFound() : View(await BuildConfirmationAsync(order, ct));
+    }
 
     [HttpGet]
     public IActionResult Checkout() => View(new CheckoutViewModel());
@@ -72,7 +74,7 @@ public class BoxOfficeController : Controller
     public async Task<IActionResult> Confirmation(int id, CancellationToken ct)
     {
         var order = await _orders.GetByIdAsync(id, ct);
-        return order is null ? NotFound() : View(BuildConfirmation(order));
+        return order is null ? NotFound() : View(await BuildConfirmationAsync(order, ct));
     }
 
     [HttpPost]
@@ -117,7 +119,7 @@ public class BoxOfficeController : Controller
         return View(model);
     }
 
-    private OrderConfirmationViewModel BuildConfirmation(Order order)
+    private async Task<OrderConfirmationViewModel> BuildConfirmationAsync(Order order, CancellationToken ct)
     {
         var tickets = order.Items
             .SelectMany(i => i.Tickets)
@@ -125,6 +127,8 @@ public class BoxOfficeController : Controller
             .Select(t => new TicketQrViewModel { Ticket = t, QrImage = _qr.ToPngDataUri(t.TicketCode) })
             .ToList();
 
-        return new OrderConfirmationViewModel { Order = order, Tickets = tickets };
+        var events = await _catalog.GetEventsAsync(order.Items.Select(i => i.EventId), ct);
+
+        return new OrderConfirmationViewModel { Order = order, Tickets = tickets, Events = events };
     }
 }

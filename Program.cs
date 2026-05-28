@@ -16,6 +16,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ITicketCodeGenerator, TicketCodeGenerator>();
 builder.Services.AddSingleton<IQrCodeService, QrCodeService>();
+builder.Services.AddScoped<IEventCatalog, EventCatalog>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 

@@ -21,51 +21,69 @@
 
         .ticket {
             width: var(--ticket-width);
-            padding: 2mm 1mm 4mm;
+            padding: 2mm 1.5mm 4mm;
             text-align: center;
             page-break-after: always;
         }
         .ticket:last-child { page-break-after: auto; }
 
-        .event {
-            font-size: 11pt;
-            font-weight: 700;
-            line-height: 1.15;
-            margin-bottom: 1mm;
+        .brand {
+            font-size: 15pt;
+            font-weight: 800;
+            letter-spacing: 1px;
+            line-height: 1.05;
+            text-transform: uppercase;
         }
-        .meta {
-            font-size: 8pt;
-            line-height: 1.3;
-            margin-bottom: 2mm;
+        .subtitle {
+            font-size: 6.5pt;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 0.5mm;
         }
-        .meta .label { font-weight: 600; }
+        .stars {
+            font-size: 9pt;
+            letter-spacing: 2px;
+            margin: 0.5mm 0;
+        }
 
-        .seat {
-            font-size: 13pt;
+        .admit {
+            display: inline-block;
+            font-size: 9pt;
             font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: 1px solid #000;
+            padding: 0.5mm 3mm;
             margin: 1mm 0;
         }
-        
-        .qr { margin: 1mm auto; width: 36mm; height: 36mm; }
+
+        .qr { margin: 1.5mm auto 0.5mm; width: 36mm; height: 36mm; }
         .qr img { width: 100% !important; height: 100% !important; display: block; image-rendering: pixelated; }
 
         .code {
             font-family: "Consolas", "Courier New", monospace;
-            font-size: 9pt;
-            letter-spacing: 0.5px;
-            margin-top: 1mm;
+            font-size: 9.5pt;
+            font-weight: 700;
+            letter-spacing: 1px;
             word-break: break-all;
         }
 
-        .divider {
-            border: none;
-            border-top: 1px dashed #000;
-            margin: 2mm 0;
+        .meta {
+            font-size: 8pt;
+            line-height: 1.35;
+            text-align: left;
+            margin: 1mm 0;
         }
+        .meta .row { display: flex; justify-content: space-between; gap: 2mm; }
+        .meta .label { font-weight: 700; text-transform: uppercase; font-size: 7pt; letter-spacing: 0.5px; }
+        .meta .val { text-align: right; }
+
+        .rule { border: none; border-top: 1.5px solid #000; margin: 1.5mm 0; }
+        .dashed { border: none; border-top: 1px dashed #000; margin: 1.5mm 0; }
 
         .footer {
             font-size: 7pt;
-            margin-top: 2mm;
+            margin-top: 1.5mm;
             line-height: 1.3;
         }
 
@@ -90,20 +108,36 @@
 
     @foreach (var item in Model.Tickets)
     {
+        var ev = Model.EventFor(item.Ticket);
         <div class="ticket">
-            <div class="event">Evento #@item.Ticket.EventId</div>
-            <div class="meta">
-                <div><span class="label">Orden:</span> #@Model.Order.Id</div>
-                <div><span class="label">Hora:</span> @Model.Order.HourAt.ToString("HH:mm")</div>
-            </div>
+            <div class="brand">Teatro Central</div>
+            <div class="subtitle">Boleto de entrada</div>
+            <div class="stars">★ ★ ★ ★ ★</div>
 
-            <div class="seat">Asiento @item.Ticket.Seat</div>
+            <hr class="rule" />
+            <div class="admit">Admite uno</div>
+            <hr class="dashed" />
 
             <div class="qr"><img src="@item.QrImage" alt="@item.Ticket.TicketCode" /></div>
-
             <div class="code">@item.Ticket.TicketCode</div>
 
-            <hr class="divider" />
+            <hr class="dashed" />
+            <div class="meta">
+                <div class="row"><span class="label">Evento</span><span class="val">@(ev?.Name ?? $"#{item.Ticket.EventId}")</span></div>
+                @if (ev is not null)
+                {
+                    <div class="row"><span class="label">Fecha</span><span class="val">@ev.StartDate.ToString("dd/MM/yyyy")</span></div>
+                }
+                <div class="row"><span class="label">Hora</span><span class="val">@Model.Order.HourAt.ToString("HH:mm")</span></div>
+                @if (!string.IsNullOrWhiteSpace(ev?.VenueName))
+                {
+                    <div class="row"><span class="label">Sala</span><span class="val">@ev!.VenueName</span></div>
+                }
+                <div class="row"><span class="label">Asiento</span><span class="val">@item.Ticket.Seat</span></div>
+                <div class="row"><span class="label">Orden</span><span class="val">#@Model.Order.Id</span></div>
+            </div>
+
+            <hr class="rule" />
             <div class="footer">
                 Presente este código en la entrada.<br />
                 Válido solo si la orden está pagada.
