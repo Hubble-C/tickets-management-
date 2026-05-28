@@ -1,5 +1,9 @@
 @using tickets_management.Enums
 @model tickets_management.Models.ViewModels.OrderSumary
+@{
+    bool isCheckout = ViewBag.IsCheckout ?? false;
+    string mainGridClass = isCheckout ? "col-span-7 flex flex-col gap-lg" : "col-span-12 flex flex-col gap-lg";
+}
 
 <form asp-controller="BoxOffice" asp-action="Checkout" method="post">
     <aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant flex flex-col py-xl">
@@ -17,8 +21,8 @@
         </div>
         <div class="flex items-center gap-4 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer rounded-lg">
             <a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high transition-colors group" asp-controller="BoxOffice" asp-action="Orders">
-                <span class="material-symbols-outlined">receipt_long</span>
-                <span class="text-sm">Orders</span>
+                <span class="material-symbols-outlined">person_add</span>
+                <span class="text-sm">Register New Customer</span>
             </a>
         </div>
     </nav>
@@ -64,7 +68,7 @@
 <main class="ml-64 mt-16 p-xl min-h-[calc(100vh-4rem)]">
     <div class="grid grid-cols-12 gap-xl max-w-7xl mx-auto">
         
-        <div class="col-span-7 flex flex-col gap-lg">
+        <div class="@mainGridClass">
             <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm h-full">
                 <div class="flex border-b border-outline-variant mb-xl">
                     <button class="px-xl py-md font-headline-md text-headline-md text-primary border-b-2 border-primary transition-all duration-200" id="tab-new">
@@ -89,7 +93,7 @@
                     
                     <div class="flex flex-col gap-xs">
                         <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Correo Electrónico</label>
-                        <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="juan.perez@email.com" type="email"/>
+                        <input name="customerEmail" class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="juan.perez@email.com" type="email" required/>
                     </div>
                     
                     <div class="flex flex-col gap-xs">
@@ -115,9 +119,12 @@
             </div>
         </div>
         
-        <div class="col-span-5 flex flex-col gap-lg" id="contenedor-resumen">
-            <partial name="_ResumenPedido" model="Model"/>
-        </div>
+        @if (isCheckout)
+        {
+            <div class="col-span-5 flex flex-col gap-lg" id="contenedor-resumen">
+                <partial name="_ResumenPedido" model="Model"/>
+            </div>
+        }
     </div>
 </main>
 </form>
