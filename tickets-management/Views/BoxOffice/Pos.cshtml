@@ -93,46 +93,46 @@
                     </div>
                 </div>
 
-                               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     @if (Model != null)
                     {
-                        foreach (var ev in Model)
-                        {
-                            <div onclick="showSeatsView('@ev.Name')" class="group event-card bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-300 cursor-pointer flex flex-col h-full">
-                                <div class="relative aspect-[2/3] overflow-hidden">
-                                    @if (!string.IsNullOrEmpty(ev.PosterUrl) && ev.PosterUrl.StartsWith("http"))
-                                    {
-                                        <img alt="Cinema Poster" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="@ev.PosterUrl"/>
-                                    }
-                                    else
-                                    {
-                                        <img alt="Cinema Poster" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=400"/>
-                                    }
-                                    @if (ev.IsActive)
-                                    {
-                                        <div class="absolute top-3 right-3 bg-primary-container text-on-primary-container px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase">ACTIVE</div>
-                                    }
-                                    <div class="event-overlay absolute inset-0 bg-primary/20 opacity-0 transition-opacity duration-300 flex items-center justify-center">
-                                        <span class="bg-primary text-on-primary px-6 py-2 rounded-full font-bold shadow-lg">Comprar Tickets</span>
-                                    </div>
-                                </div>
-                                <div class="p-4 space-y-1 flex-1 flex flex-col">
-                                    <h3 class="text-lg font-bold text-on-surface line-clamp-1">@ev.Name</h3>
-                                    <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
-                                        <span class="material-symbols-outlined text-[18px]">calendar_today</span>
-                                        <span>@ev.StartDate.ToString("dd MMM yyyy, HH:mm")</span>
-                                    </div>
-                                    <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
-                                        <span class="material-symbols-outlined text-[18px]">location_on</span>
-                                        <span>@(string.IsNullOrEmpty(ev.VenueName) ? $"Sala {ev.VenueId}" : ev.VenueName)</span>
-                                    </div>
-                                    <div class="pt-3 mt-auto flex justify-between items-center border-t border-outline-variant/30">
-                                        <span class="text-[10px] font-bold text-on-surface-variant uppercase">Desde</span>
-                                        <span class="text-lg font-bold text-primary">$120.00</span>
-                                    </div>
-                                </div>
+                    foreach (var ev in Model)
+                    {
+                    <div onclick="showSeatsView('@ev.Name', @ev.Id)" class="group event-card bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-300 cursor-pointer flex flex-col h-full">
+                        <div class="relative aspect-[2/3] overflow-hidden">
+                            @if (!string.IsNullOrEmpty(ev.PosterUrl) && ev.PosterUrl.StartsWith("http"))
+                            {
+                            <img alt="Cinema Poster" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="@ev.PosterUrl"/>
+                            }
+                            else
+                            {
+                            <img alt="Cinema Poster" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=400"/>
+                            }
+                            @if (ev.IsActive)
+                            {
+                            <div class="absolute top-3 right-3 bg-primary-container text-on-primary-container px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase">ACTIVE</div>
+                            }
+                            <div class="event-overlay absolute inset-0 bg-primary/20 opacity-0 transition-opacity duration-300 flex items-center justify-center">
+                                <span class="bg-primary text-on-primary px-6 py-2 rounded-full font-bold shadow-lg">Comprar Tickets</span>
                             </div>
-                        }
+                        </div>
+                        <div class="p-4 space-y-1 flex-1 flex flex-col">
+                            <h3 class="text-lg font-bold text-on-surface line-clamp-1">@ev.Name</h3>
+                            <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
+                                <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                                <span>@ev.StartDate.ToString("dd MMM yyyy, HH:mm")</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
+                                <span class="material-symbols-outlined text-[18px]">location_on</span>
+                                <span>@(string.IsNullOrEmpty(ev.VenueName) ? $"Sala {ev.VenueId}" : ev.VenueName)</span>
+                            </div>
+                            <div class="pt-3 mt-auto flex justify-between items-center border-t border-outline-variant/30">
+                                <span class="text-[10px] font-bold text-on-surface-variant uppercase">Desde</span>
+                                <span class="text-lg font-bold text-primary" id="price-ev-@ev.Id">...</span>
+                            </div>
+                        </div>
+                    </div>
+                    }
                     }
                 </div>
             </div>
@@ -205,11 +205,11 @@
                             <div class="h-4 w-[1px] bg-outline-variant mx-2"></div>
                             <div class="flex items-center gap-2">
                                 <div class="w-4 h-4 rounded bg-tertiary"></div>
-                                <span>VIP ($110)</span>
+                                <span id="legend-vip-price">VIP</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <div class="w-4 h-4 rounded bg-primary-container"></div>
-                                <span>GENERAL ($65)</span>
+                                <span id="legend-general-price">GENERAL</span>
                             </div>
                         </div>
 
@@ -262,7 +262,6 @@
                     </div>
                     <form asp-action="PersistOrder" asp-controller="BoxOffice" method="post">
                         <input type="hidden" name="OrderData" id="order-data-input" />
-    
                         <button type="submit" onclick="prepareAndSubmit(event)" class="w-full bg-primary text-on-primary h-14 rounded-lg font-bold flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
                             Continuar Pago
                             <span class="material-symbols-outlined">arrow_forward</span>
@@ -276,41 +275,51 @@
 </div>
 
 <script>
-    function prepareAndSubmit(event) {
-        if (currentOrder.seats.length === 0) {
-            event.preventDefault();
-            alert('Selecciona asientos.');
-            return;
-        }
-        // Pasamos el JSON actual al input oculto antes de que el formulario se envíe
-        document.getElementById('order-data-input').value = JSON.stringify(currentOrder);
-    }
     // --- Configuración Global de Precios por Zona ---
-    const PRICING_RULES = {
-        VIP: { price: 110.00, label: 'ZONA VIP', icon: 'stars' },
-        GENERAL: { price: 65.00, label: 'ZONA GENERAL', icon: 'chair' }
+    // Cargados desde la BD al abrir cada evento, no hardcodeados
+    let PRICING_RULES = {
+        VIP:     { price: 0, label: 'ZONA VIP',     icon: 'stars' },
+        GENERAL: { price: 0, label: 'ZONA GENERAL', icon: 'chair' }
     };
-    const SERVICE_CHARGE_RATE = 0.07; // 7% de cargo administrativo
+    const SERVICE_CHARGE_RATE = 0.07;
 
-    const rowsArr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+    const rowsArr    = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
     const gridTarget = document.getElementById('dynamic-grid-placeholder');
 
-    // Estado Global Reactivo de la Venta
     let currentOrder = {
-        movie: '',
-        seats: [] // Estructura: { id: 'B-12', row: 'B', num: 12, zone: 'VIP', price: 110 }
+        movie:   '',
+        eventId: 0,
+        seats:   []
     };
 
-    // Generador determinista de asientos ocupados para consistencia visual
-    function checkIfOccupied(row, num) {
-        return (row.charCodeAt(0) * num) % 6 === 0;
+    // --- Carga asientos ocupados + precios reales desde el servidor ---
+    async function loadSeatData(eventId) {
+        const response = await fetch(`/BoxOffice/GetSeatData?eventId=${eventId}`);
+        const data     = await response.json();
+
+        // Actualizar precios reales desde TicketTypes de db_catalog
+        data.ticketTypes.forEach(tt => {
+            const key = tt.name.toUpperCase();
+            if (PRICING_RULES[key]) {
+                PRICING_RULES[key].price = parseFloat(tt.price);
+            }
+        });
+
+        // Actualizar leyenda con precios reales
+        document.getElementById('legend-vip-price').textContent     = `VIP ($${PRICING_RULES.VIP.price.toFixed(2)})`;
+        document.getElementById('legend-general-price').textContent = `GENERAL ($${PRICING_RULES.GENERAL.price.toFixed(2)})`;
+
+        // Ocupados = vendidos en db_sales + en proceso de compra ahora (Singleton)
+        return [...data.occupiedSeats, ...data.pendingSeats];
     }
 
-    // --- 1. Inicialización y Renderizado del Mapa de Asientos ---
-    function initSeatMap() {
+    // --- Inicialización del mapa con asientos reales ---
+    async function initSeatMap(occupiedSeats = []) {
+        const occupiedSet = new Set(occupiedSeats);
+
         gridTarget.innerHTML = rowsArr.map(row => {
             const isVip = ['A', 'B', 'C'].includes(row);
-            const zone = isVip ? 'VIP' : 'GENERAL';
+            const zone  = isVip ? 'VIP' : 'GENERAL';
 
             return `
                 <div data-row-letter="${row}" class="seat-row-container flex items-center gap-4 transition-all duration-200">
@@ -318,13 +327,10 @@
                     <div class="seat-grid flex gap-1">
                         ${Array(20).fill(0).map((_, i) => {
                 const seatNum = i + 1;
-                const seatId = `${row}-${seatNum}`;
-                const isOccupied = checkIfOccupied(row, seatNum);
+                const seatId  = `${row}-${seatNum}`;
 
-                if (isOccupied) {
-                    return `
-                                    <button disabled class="w-6 h-6 rounded-sm bg-outline-variant text-white text-[10px] font-mono cursor-not-allowed opacity-40 flex items-center justify-center pointer-events-none">X</button>
-                                `;
+                if (occupiedSet.has(seatId)) {
+                    return `<button disabled class="w-6 h-6 rounded-sm bg-outline-variant text-white text-[10px] font-mono cursor-not-allowed opacity-40 flex items-center justify-center pointer-events-none">X</button>`;
                 }
 
                 const zoneClasses = isVip
@@ -332,10 +338,10 @@
                     : 'bg-surface-container text-primary border border-primary/20 hover:ring-2 hover:ring-primary/50';
 
                 return `
-                                <button 
-                                    data-id="${seatId}" 
-                                    data-row="${row}" 
-                                    data-num="${seatNum}" 
+                                <button
+                                    data-id="${seatId}"
+                                    data-row="${row}"
+                                    data-num="${seatNum}"
                                     data-zone="${zone}"
                                     onclick="toggleSeatSelection(this)"
                                     class="seat-btn w-6 h-6 rounded-sm transition-all flex items-center justify-center font-mono text-[10px] ${zoneClasses}">
@@ -350,22 +356,20 @@
         }).join('');
     }
 
-    // --- 2. Lógica de Interacción con las Sillas ---
+    // --- Lógica de Interacción con las Sillas ---
     function toggleSeatSelection(btn) {
-        const id = btn.dataset.id;
-        const row = btn.dataset.row;
-        const num = parseInt(btn.dataset.num);
-        const zone = btn.dataset.zone;
+        const id    = btn.dataset.id;
+        const row   = btn.dataset.row;
+        const num   = parseInt(btn.dataset.num);
+        const zone  = btn.dataset.zone;
         const price = PRICING_RULES[zone].price;
 
         const index = currentOrder.seats.findIndex(s => s.id === id);
 
         if (index > -1) {
-            // Si ya existe, lo removemos
             currentOrder.seats.splice(index, 1);
             applySeatStyle(btn, zone, false);
         } else {
-            // Si es nuevo, lo registramos en el carrito
             currentOrder.seats.push({ id, row, num, zone, price });
             applySeatStyle(btn, zone, true);
         }
@@ -390,9 +394,7 @@
     function removeSeatById(id) {
         currentOrder.seats = currentOrder.seats.filter(s => s.id !== id);
         const btn = document.querySelector(`[data-id="${id}"]`);
-        if (btn) {
-            applySeatStyle(btn, btn.dataset.zone, false);
-        }
+        if (btn) applySeatStyle(btn, btn.dataset.zone, false);
         updateOrderSummary();
     }
 
@@ -405,16 +407,14 @@
         updateOrderSummary();
     }
 
-    // --- 3. Actualización Dinámica del Resumen de la Orden ---
+    // --- Actualización Dinámica del Resumen ---
     function updateOrderSummary() {
         document.getElementById('ticket-count-label').textContent = `Boletos Seleccionados (${currentOrder.seats.length})`;
 
         const container = document.getElementById('selected-tickets-container');
 
         if (currentOrder.seats.length === 0) {
-            container.innerHTML = `
-                <p class="text-xs text-on-surface-variant/60 text-center py-6 italic">No hay asientos seleccionados en esta sesión.</p>
-            `;
+            container.innerHTML = `<p class="text-xs text-on-surface-variant/60 text-center py-6 italic">No hay asientos seleccionados en esta sesión.</p>`;
         } else {
             container.innerHTML = currentOrder.seats.map(seat => {
                 const rules = PRICING_RULES[seat.zone];
@@ -440,84 +440,44 @@
             }).join('');
         }
 
-        // Cálculos Financieros
-        const subtotal = currentOrder.seats.reduce((sum, s) => sum + s.price, 0);
+        const subtotal      = currentOrder.seats.reduce((sum, s) => sum + s.price, 0);
         const serviceCharge = subtotal * SERVICE_CHARGE_RATE;
-        const total = subtotal + serviceCharge;
+        const total         = subtotal + serviceCharge;
 
-        // Inyección de valores calculados
-        document.getElementById('summary-subtotal').textContent = `$${subtotal.toFixed(2)}`;
+        document.getElementById('summary-subtotal').textContent       = `$${subtotal.toFixed(2)}`;
         document.getElementById('summary-service-charge').textContent = `$${serviceCharge.toFixed(2)}`;
-        document.getElementById('summary-total').textContent = `$${total.toFixed(2)}`;
-
-        // Persistencia automática inmediata de borrador
-        localStorage.setItem('pos_current_order_draft', JSON.stringify(currentOrder));
+        document.getElementById('summary-total').textContent          = `$${total.toFixed(2)}`;
     }
 
-    // --- 4. Filtros de Categoría y Sección Opcionales ---
-    function filterSeatsBySelectors() {
-        const category = document.getElementById('select-category-filter').value;
-        const section = document.getElementById('select-section-filter').value;
-        const rows = document.querySelectorAll('.seat-row-container');
-
-        rows.forEach(rowView => {
-            const rowLetter = rowView.dataset.rowLetter;
-            const isVipRow = ['A', 'B', 'C'].includes(rowLetter);
-
-            let matchesCategory = true;
-            let matchesSection = true;
-
-            if (category === 'VIP' && !isVipRow) matchesCategory = false;
-            if (category === 'General' && isVipRow) matchesCategory = false;
-
-            if (section === 'Platea Baja' && !['A', 'B', 'C'].includes(rowLetter)) matchesSection = false;
-            if (section === 'Platea Alta' && !['D', 'E', 'F', 'G'].includes(rowLetter)) matchesSection = false;
-            if (section === 'Palcos' && !['H', 'I', 'J'].includes(rowLetter)) matchesSection = false;
-
-            if (matchesCategory && matchesSection) {
-                rowView.classList.remove('hidden');
-            } else {
-                rowView.classList.add('hidden');
-            }
-        });
-    }
-
-    // --- 5. Persistencia al continuar (Redirección .NET) ---
-    function storeFinalizedOrder(event) {
+    // --- Continuar al pago ---
+    function prepareAndSubmit(event) {
         if (currentOrder.seats.length === 0) {
             event.preventDefault();
-            alert('Por favor, selecciona al menos un asiento antes de continuar con la transacción.');
+            alert('Por favor, selecciona al menos un asiento antes de continuar.');
             return;
         }
-        // Guardamos el objeto finalizado listo para ser leído en la siguiente vista / controlador
-        localStorage.setItem('pos_finalized_order', JSON.stringify(currentOrder));
+        document.getElementById('order-data-input').value = JSON.stringify(currentOrder);
     }
 
-    // --- 6. Alternancia de Vistas (Control UI mediante Clases) ---
-    function showSeatsView(movieName) {
+    // --- Abrir vista de asientos para un evento ---
+    async function showSeatsView(movieName, eventId) {
         document.getElementById('view-pos-catalog').classList.add('hidden');
         document.getElementById('view-seats-selection').classList.remove('hidden');
-
         document.getElementById('selected-movie-title').innerText = movieName;
-        document.getElementById('summary-movie-title').innerText = movieName;
+        document.getElementById('summary-movie-title').innerText  = movieName;
 
-        currentOrder.movie = movieName;
+        currentOrder.movie   = movieName;
+        currentOrder.eventId = eventId;
+        currentOrder.seats   = [];
 
-        // Recuperar persistencia si coincide la película
-        const savedDraft = localStorage.getItem('pos_current_order_draft');
-        if (savedDraft) {
-            const parsed = JSON.parse(savedDraft);
-            if (parsed.movie === movieName) {
-                currentOrder.seats = parsed.seats;
-                // Pintar de nuevo las sillas seleccionadas en la UI
-                currentOrder.seats.forEach(seat => {
-                    const btn = document.querySelector(`[data-id="${seat.id}"]`);
-                    if (btn) applySeatStyle(btn, seat.zone, true);
-                });
-            }
-        }
+        // Mostrar loading mientras carga la BD
+        gridTarget.innerHTML = `<p class="text-center text-on-surface-variant py-8 animate-pulse">Cargando mapa de asientos...</p>`;
+
+        const occupiedSeats = await loadSeatData(eventId);
+        await initSeatMap(occupiedSeats);
 
         updateOrderSummary();
+
         document.getElementById('nav-events').className = "flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container border-r-4 border-primary font-bold transition-all duration-150 cursor-pointer rounded-r-lg";
     }
 
@@ -526,9 +486,30 @@
         document.getElementById('view-pos-catalog').classList.remove('hidden');
     }
 
-    // Inicializar el Grid al cargar el DOM
+    function filterSeatsBySelectors() {
+        const category = document.getElementById('select-category-filter').value;
+        const section  = document.getElementById('select-section-filter').value;
+        const rows     = document.querySelectorAll('.seat-row-container');
+
+        rows.forEach(rowView => {
+            const rowLetter = rowView.dataset.rowLetter;
+            const isVipRow  = ['A', 'B', 'C'].includes(rowLetter);
+
+            let matchesCategory = true;
+            let matchesSection  = true;
+
+            if (category === 'VIP' && !isVipRow)    matchesCategory = false;
+            if (category === 'General' && isVipRow) matchesCategory = false;
+
+            if (section === 'Platea Baja' && !['A', 'B', 'C'].includes(rowLetter))      matchesSection = false;
+            if (section === 'Platea Alta' && !['D', 'E', 'F', 'G'].includes(rowLetter)) matchesSection = false;
+            if (section === 'Palcos'      && !['H', 'I', 'J'].includes(rowLetter))      matchesSection = false;
+
+            rowView.classList.toggle('hidden', !(matchesCategory && matchesSection));
+        });
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
-        initSeatMap();
         updateOrderSummary();
     });
 </script>

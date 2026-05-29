@@ -1,15 +1,20 @@
 using Dapper;
+using tickets_management.Data;
 using tickets_management.Models;
 using tickets_management.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using tickets_management.Enums;
 
 namespace tickets_management.Services;
 
 public class EventService : IEventService
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly MySqlDbContext _context;
 
-    public EventService(IDbConnectionFactory dbConnectionFactory)
+    public EventService(IDbConnectionFactory dbConnectionFactory,  MySqlDbContext context)
     {
+        _context = context;
         _dbConnectionFactory = dbConnectionFactory;
     }
 
@@ -35,5 +40,30 @@ public class EventService : IEventService
             ORDER BY e.StartDate ASC";
 
         return await connection.QueryAsync<Events>(sql);
+    }
+
+
+    public async Task<IEnumerable<TicketType>> GetTicketTypesByEventAsync(int eventId)
+    {
+        using var connection = _dbConnectionFactory.GetCatalogConnection();
+
+        var sql = @"
+            SELECT Id, Name, Price, Quantity, EventId
+            FROM TicketTypes
+            WHERE EventId = @EventId";
+
+        return await connection.QueryAsync<TicketType>(sql, new { EventId = eventId });
+    }
+
+
+    public async Task<IEnumerable<string>> GetOccupiedSeatsByEventAsync(int eventId)
+    {
+        var data = _context.Tickets.Where(t => t.EventId == eventId);
+        
+        return await _context.Tickets
+            .Where(t => t.EventId == eventId && t.Status == TicketStatus.Available)
+            .Select(t => t.Seat)
+            .ToListAsync();
+        
     }
 }

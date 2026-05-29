@@ -14,7 +14,7 @@ namespace tickets_management.Controllers
         private readonly IOrderService _orderService;
         private readonly IEventService _eventService;
 
-        public BoxOfficeController(ILogin login, IOrderService orderService,  IEventService eventService)
+        public BoxOfficeController(ILogin login, IOrderService orderService, IEventService eventService)
         {
             _orderService = orderService;
             _login = login;
@@ -23,38 +23,77 @@ namespace tickets_management.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login()
-        {
-            return View();
-        }
+        public IActionResult Login() => View();
 
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
             var response = await _login.Login(username, password);
-            
+
             if (response != null && response.Success)
             {
                 HttpContext.Session.SetString("Username", username);
                 HttpContext.Session.SetString("JWToken", response.Data.Token);
                 return RedirectToAction("Pos");
             }
-            else
-            {
-                ViewBag.Message = response?.Message ?? "Login failed";
-                ViewBag.Success = false;
-                
-                ModelState.AddModelError(string.Empty, "Credenciales incorrectas o no tienes permisos de Seller.");
-            }
+
+            ViewBag.Message = response?.Message ?? "Login failed";
+            ViewBag.Success = false;
+            ModelState.AddModelError(string.Empty, "Credenciales incorrectas o no tienes permisos de Seller.");
             return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Pos()
+        {
+            var token = HttpContext.Session.GetString("JWToken");
+            if (string.IsNullOrEmpty(token))
+                return RedirectToAction("Login");
+
+            var events = await _eventService.GetActiveEventsAsync();
+            return View(events);
+        }
+
+        // Endpoint que llama el JS al abrir el mapa de un evento
+        // Devuelve JSON con: asientos ocupados + precios reales por zona
+        [HttpGet]
+        public async Task<IActionResult> GetSeatData(int eventId)
+        {
+            var token = HttpContext.Session.GetString("JWToken");
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized();
+
+            // Asientos ya vendidos en db_sales
+            var occupiedSeats = await _eventService.GetOccupiedSeatsByEventAsync(eventId);
+
+            // Precios reales desde db_catalog TicketTypes
+            var ticketTypes = await _eventService.GetTicketTypesByEventAsync(eventId);
+
+            // También incluimos los asientos en proceso de compra ahora mismo (Singleton)
+            var username = HttpContext.Session.GetString("Username");
+            var currentOrder = await _orderService.GetOrderAsync(username);
+            var pendingSeats = currentOrder?.SelectedSeats
+                .Select(s => $"{s.Row}-{s.SeatNumber}")
+                .ToList() ?? new List<string>();
+
+            return Json(new
+            {
+                occupiedSeats = occupiedSeats,
+                pendingSeats  = pendingSeats,
+                ticketTypes   = ticketTypes.Select(t => new
+                {
+                    name  = t.Name.ToUpper(),
+                    price = t.Price
+                })
+            });
         }
 
         [HttpGet]
         public async Task<IActionResult> Orders()
         {
-            var token    = HttpContext.Session.GetString("JWToken");
-            var session  = HttpContext.Session.GetString("Username");
+            var token   = HttpContext.Session.GetString("JWToken");
+            var session = HttpContext.Session.GetString("Username");
 
             if (string.IsNullOrEmpty(token))
                 return RedirectToAction("Login");
@@ -94,7 +133,6 @@ namespace tickets_management.Controllers
                 };
             }
 
-
             return View(orderSummary);
         }
 
@@ -105,24 +143,39 @@ namespace tickets_management.Controllers
             return RedirectToAction("Login");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Pos()
+        [HttpPost]
+        public async Task<IActionResult> PersistOrder(string orderData)
         {
-            var token = HttpContext.Session.GetString("JWToken");
-            if (string.IsNullOrEmpty(token))
-                return RedirectToAction("Login");
- 
-            var events = await _eventService.GetActiveEventsAsync();
-            return View(events);
+            var username = HttpContext.Session.GetString("Username");
 
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var order   = JsonSerializer.Deserialize<CurrentOrder>(orderData, options);
+
+            if (order?.Seats != null)
+            {
+                // Limpiamos antes de repoblar por si el usuario volvió y cambió selección
+                await _orderService.ClearOrderAsync(username);
+
+                foreach (var seat in order.Seats)
+                {
+                    await _orderService.AddSeatAsync(username, seat);
+                }
+
+                // Guardamos el eventId en el TempOrder para usarlo en SaveOrderAsync
+                var tempOrder = await _orderService.GetOrderAsync(username);
+                if (tempOrder != null)
+                    tempOrder.EventId = order.EventId.ToString();
+            }
+
+            return RedirectToAction("Orders");
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddSeat(string seatId)
+        public async Task<IActionResult> CancelOrder()
         {
             var username = HttpContext.Session.GetString("Username");
-            await _orderService.AddSeatAsync(username, new SeatViewModel { Id = seatId });
-            return RedirectToAction(nameof(Pos));
+            await _orderService.ClearOrderAsync(username);
+            return RedirectToAction("Pos");
         }
 
         [HttpPost]
@@ -170,37 +223,6 @@ namespace tickets_management.Controllers
             return View();
         }
 
-        public IActionResult Seats()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> PersistOrder(string orderData)
-        {
-            var username = HttpContext.Session.GetString("Username");
-
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var order   = JsonSerializer.Deserialize<CurrentOrder>(orderData, options);
-
-            if (order?.Seats != null)
-            {
-                foreach (var seat in order.Seats)
-                {
-                   
-                    await _orderService.AddSeatAsync(username, seat);
-                }
-            }
-
-            return RedirectToAction("Orders");
-        }
-        [HttpPost]
-        public async Task<IActionResult> CancelOrder()
-        {
-            var username = HttpContext.Session.GetString("Username");
-            await _orderService.ClearOrderAsync(username);
-            return RedirectToAction("Pos");
-        }
+        public IActionResult Seats() => View();
     }
-    
 }

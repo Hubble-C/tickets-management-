@@ -16,5 +16,7 @@ namespace tickets_management.Models
 
 
         public string VenueName { get; set; }
+        
+        public int TicketTypeId { get; set; }
     }
 }

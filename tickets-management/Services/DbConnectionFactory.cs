@@ -18,4 +18,7 @@ public class DbConnectionFactory : IDbConnectionFactory
 
     public IDbConnection GetCatalogConnection() => 
         new MySqlConnection(_configuration.GetConnectionString("DbCatalogConnection"));
+    
+    public IDbConnection GetPublicConnection() =>
+        new MySqlConnection(_configuration.GetConnectionString("DbPublicConnection"));
 }

@@ -6,4 +6,5 @@ public interface IDbConnectionFactory
 {
     IDbConnection GetAuthConnection();
     IDbConnection GetCatalogConnection();
+    IDbConnection GetPublicConnection();
 }
