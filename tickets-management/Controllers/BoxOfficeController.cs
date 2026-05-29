@@ -1,7 +1,9 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using tickets_management.Models.ViewModels;
 using tickets_management.Enums;
+using tickets_management.Models;
 using tickets_management.Services.Interfaces;
 
 namespace tickets_management.Controllers
@@ -10,9 +12,11 @@ namespace tickets_management.Controllers
     public class BoxOfficeController : Controller
     {
         private readonly ILogin _login;
+        private readonly IOrderService _orderService;
 
-        public BoxOfficeController(ILogin login)
+        public BoxOfficeController(ILogin login, IOrderService orderService)
         {
+            _orderService = orderService;
             _login = login;
         }
         
@@ -43,26 +47,53 @@ namespace tickets_management.Controllers
         }
 
         [HttpGet]
-        public IActionResult Orders()
+        public async Task<IActionResult> Orders()
         {
             var token = HttpContext.Session.GetString("JWToken");
-
+            var session = HttpContext.Session.GetString("Username");
+            
+            
             if (string.IsNullOrEmpty(token))
             {
                 return RedirectToAction("Login");
             }
             
-            var resumenInicial = new OrderSumary
+            var Order = await _orderService.GetOrderAsync(session);
+            
+            if (Order != null)
             {
-                Subtotal = 0,
-                Tax = 0,
-                Discount = 0,
-                Total = 0,
-                TypePayment = TypePayment.Cash,
-                CartSummaries = new List<CartSummary>()
-            };
-
-            return View(resumenInicial);
+                var orderSummary = new OrderSumary
+                {
+                    Subtotal =  Order.Subtotal,
+                    Tax = Order.Tax,
+                    Discount = Order.Discount,
+                    Total = Order.Total,
+                    CartSummaries = Order.SelectedSeats.Select(s => new CartSummary {
+                        Concept = "Entrada de Teatro",
+                        SeatsDetail = $"Fila {s.Row}, Asiento {s.SeatNumber} ({s.Label})",
+                        LineTotal = s.Price
+                    }).ToList()
+                };
+                
+                return PartialView("_ResumenPedido", orderSummary);
+            }
+            else
+            {
+                var resumenInicial = new OrderSumary
+                {
+                    Subtotal = 0,
+                    Tax = 0,
+                    Discount = 0,
+                    Total = 0,
+                    TypePayment = TypePayment.Cash,
+                    CartSummaries = new List<CartSummary>()
+                };
+                
+                return View(resumenInicial);
+            }
+            
+            
+            
         }
 
  
@@ -76,40 +107,50 @@ namespace tickets_management.Controllers
         }
 
         [HttpGet]
-        public IActionResult Pos()
+        public async Task<IActionResult> Pos()
         {
+            var username = HttpContext.Session.GetString("Username");
             var token = HttpContext.Session.GetString("JWToken");
 
             if (string.IsNullOrEmpty(token))
             {
                 return RedirectToAction("Login");
             }
-            return View();
+            var tempOrder = await _orderService.GetOrderAsync(username);
+            return View(tempOrder);
+            
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> AddSeat(string seatId)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            await _orderService.AddSeatAsync(username, seatId);
+            return RedirectToAction(nameof(Pos));
         }
 
         [HttpPost]
-        public IActionResult Checkout(int showId, List<string> seats, string customerEmail, string paymentMethod)
+        public async Task<IActionResult> Checkout(string PaymentMethod)
         {
+            var username = HttpContext.Session.GetString("Username");
             var token = HttpContext.Session.GetString("JWToken");
-
             if (string.IsNullOrEmpty(token))
             {
                 return RedirectToAction("Login");
             }
             
-            var orderNum = $"TKT-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(100, 999)}";
-            return RedirectToAction("PrintTicket", new { 
-                orderNumber = orderNum,
-                showName = "The Phantom of the Opera",
-                showTime = "Monday, October 12 • 07:00 PM",
-                hall = "Main Hall",
-                seats = string.Join(", ", seats ?? new List<string>()),
-                email = customerEmail,
-                paymentMethod = paymentMethod,
-                subtotal = "45.00",
-                serviceFee = "2.50",
-                total = "47.50"
-            });
+            var tempOrder = await _orderService.GetOrderAsync(username);
+            if (tempOrder != null)
+            {
+                await _orderService.SaveOrderAsync(tempOrder);
+                await _orderService.ClearOrderAsync(username);
+                return RedirectToAction("PrintTicket", new
+                {
+                    orderNumber = tempOrder.Id,
+                    total = tempOrder.Total.ToString("F2"),
+                });
+            }
+            return RedirectToAction("Pos");
         }
 
         [HttpGet]
@@ -137,6 +178,25 @@ namespace tickets_management.Controllers
         public IActionResult Seats()
         {
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PersistOrder(string orderData)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var order = JsonSerializer.Deserialize<CurrentOrder>(orderData, options );
+    
+            
+            if (order != null && order.Seats != null)
+            {
+                foreach(var seat in order.Seats) {
+                    await _orderService.AddSeatAsync(username, seat.Id);
+                }
+            }
+    
+            return RedirectToAction("Orders");
         }
     }
 }

@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using tickets_management.Data;
 using tickets_management.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<ILogin, LoginService>();
 builder.Services.AddTransient<IPasswordHasher<AspNetUsers>, PasswordHasher<AspNetUsers>>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -24,6 +27,11 @@ builder.Services.AddSession(options =>
 
 var AuthConnectionString = builder.Configuration.GetConnectionString("DbAuthConnection");
 builder.Services.AddTransient<IDbConnection>(sp => new MySqlConnection(AuthConnectionString));
+
+var SalesConnectionString = builder.Configuration.GetConnectionString("DbSalesConnection");
+builder.Services.AddDbContext<MySqlDbContext>(options =>
+    options.UseMySql(SalesConnectionString, ServerVersion.AutoDetect(SalesConnectionString)));
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {   
     options.TokenValidationParameters = new TokenValidationParameters

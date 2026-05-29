@@ -294,12 +294,14 @@
                             <span id="summary-total" class="text-lg font-bold text-primary">$0.00</span>
                         </div>
                     </div>
-                    <a asp-action="Orders" asp-controller="BoxOffice" onclick="storeFinalizedOrder(event)">
-                        <button class="w-full bg-primary text-on-primary h-14 rounded-lg font-bold flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
-                            Continuar
+                    <form asp-action="PersistOrder" asp-controller="BoxOffice" method="post">
+                        <input type="hidden" name="OrderData" id="order-data-input" />
+    
+                        <button type="submit" onclick="prepareAndSubmit(event)" class="w-full bg-primary text-on-primary h-14 rounded-lg font-bold flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
+                            Continuar Pago
                             <span class="material-symbols-outlined">arrow_forward</span>
                         </button>
-                    </a>
+                    </form>
                 </div>
             </aside>
         </section>
@@ -308,6 +310,15 @@
 </div>
 
 <script>
+    function prepareAndSubmit(event) {
+        if (currentOrder.seats.length === 0) {
+            event.preventDefault();
+            alert('Selecciona asientos.');
+            return;
+        }
+        // Pasamos el JSON actual al input oculto antes de que el formulario se envíe
+        document.getElementById('order-data-input').value = JSON.stringify(currentOrder);
+    }
     // --- Configuración Global de Precios por Zona ---
     const PRICING_RULES = {
         VIP: { price: 110.00, label: 'ZONA VIP', icon: 'stars' },
