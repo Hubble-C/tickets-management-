@@ -1,3 +1,5 @@
+@model IEnumerable<tickets_management.Models.Events>
+
 <div id="pos-app-container" class="flex h-screen w-screen overflow-hidden">
 
     <!-- SIDEBAR / NAVIGATION -->
@@ -50,10 +52,10 @@
                 </div>
 
                 <div class="flex items-center gap-6 ml-6">
-                    <button class="flex items-center gap-2 bg-primary-container/10 text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase hover:bg-primary-container/20 transition-all active:scale-[0.98]">
-                        <span class="material-symbols-outlined text-lg">person_add</span>
-                        Registrar Nuevo Cliente
-                    </button>
+                    <a asp-action="Logout" asp-controller="BoxOffice" class="flex items-center gap-2 bg-error/10 text-error px-4 py-1.5 rounded-full text-xs font-bold uppercase hover:bg-error/20 transition-all active:scale-[0.98]">
+                        <span class="material-symbols-outlined text-lg">logout</span>
+                        Logout
+                    </a>
                     <div class="h-8 w-px bg-outline-variant"></div>
                     <div class="flex items-center gap-4">
                         <button class="p-1.5 rounded-full hover:bg-secondary-container/50 transition-all relative">
@@ -91,83 +93,47 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <!-- Movie 1 -->
-                    <div onclick="showSeatsView('Odisea Estelar')" class="group event-card bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-300 cursor-pointer flex flex-col h-full">
-                        <div class="relative aspect-[2/3] overflow-hidden">
-                            <img alt="Cinema Poster 1" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADL15HcO4idGOxvSP31b3FfaSDI2Ewe-nReOk8IbxsJ3d8tKHUvH8vrwVDBUZTw3q3pgga99knPt0WBdpCttXGvOpLBn2kmQ6mkUbUZfkKZZvzN6x_UVa1bRYSoCt5VTA-gf-RCOXkTV3pE1m3_0as-VF18tif_8M1-yY5ifadDWy-UgpVJV88UYX8u4Me-qPqHKlleyvpdwg35cIvdc7zwxRKTUqmpxd0smvSYAisCJv6XA9N3uocKT-qnEXblqrM-O0HBfssveUP"/>
-                            <div class="absolute top-3 right-3 bg-primary-container text-on-primary-container px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase">PREMIER</div>
-                            <div class="event-overlay absolute inset-0 bg-primary/20 opacity-0 transition-opacity duration-300 flex items-center justify-center">
-                                <span class="bg-primary text-on-primary px-6 py-2 rounded-full font-bold shadow-lg">Comprar Tickets</span>
+                               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    @if (Model != null)
+                    {
+                        foreach (var ev in Model)
+                        {
+                            <div onclick="showSeatsView('@ev.Name')" class="group event-card bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-300 cursor-pointer flex flex-col h-full">
+                                <div class="relative aspect-[2/3] overflow-hidden">
+                                    @if (!string.IsNullOrEmpty(ev.PosterUrl) && ev.PosterUrl.StartsWith("http"))
+                                    {
+                                        <img alt="Cinema Poster" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="@ev.PosterUrl"/>
+                                    }
+                                    else
+                                    {
+                                        <img alt="Cinema Poster" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=400"/>
+                                    }
+                                    @if (ev.IsActive)
+                                    {
+                                        <div class="absolute top-3 right-3 bg-primary-container text-on-primary-container px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase">ACTIVE</div>
+                                    }
+                                    <div class="event-overlay absolute inset-0 bg-primary/20 opacity-0 transition-opacity duration-300 flex items-center justify-center">
+                                        <span class="bg-primary text-on-primary px-6 py-2 rounded-full font-bold shadow-lg">Comprar Tickets</span>
+                                    </div>
+                                </div>
+                                <div class="p-4 space-y-1 flex-1 flex flex-col">
+                                    <h3 class="text-lg font-bold text-on-surface line-clamp-1">@ev.Name</h3>
+                                    <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
+                                        <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                                        <span>@ev.StartDate.ToString("dd MMM yyyy, HH:mm")</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
+                                        <span class="material-symbols-outlined text-[18px]">location_on</span>
+                                        <span>@(string.IsNullOrEmpty(ev.VenueName) ? $"Sala {ev.VenueId}" : ev.VenueName)</span>
+                                    </div>
+                                    <div class="pt-3 mt-auto flex justify-between items-center border-t border-outline-variant/30">
+                                        <span class="text-[10px] font-bold text-on-surface-variant uppercase">Desde</span>
+                                        <span class="text-lg font-bold text-primary">$120.00</span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="p-4 space-y-1 flex-1 flex flex-col">
-                            <h3 class="text-lg font-bold text-on-surface line-clamp-1">Odisea Estelar</h3>
-                            <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
-                                <span class="material-symbols-outlined text-[18px]">calendar_today</span>
-                                <span>Hoy, 18:30 & 21:00</span>
-                            </div>
-                            <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
-                                <span class="material-symbols-outlined text-[18px]">location_on</span>
-                                <span>Sala 04 - IMAX</span>
-                            </div>
-                            <div class="pt-3 mt-auto flex justify-between items-center border-t border-outline-variant/30">
-                                <span class="text-[10px] font-bold text-on-surface-variant uppercase">Desde</span>
-                                <span class="text-lg font-bold text-primary">$120.00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Movie 2 -->
-                    <div onclick="showSeatsView('Sombras de la Ciudad')" class="group event-card bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-300 cursor-pointer flex flex-col h-full">
-                        <div class="relative aspect-[2/3] overflow-hidden">
-                            <img alt="Cinema Poster 2" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD37c8H0s4lzpiUKWzfddhbXFAKCQbjKQ515snzg6D-_fckGn_3ZZMQ1xU6rPTQACXWyk4osbApBa_WqPhwyNqWU6SgQJO1GMhIyGuNlJFWtDLnS30Yj5-YsfBCR6Ug52r2aRNVQc5fKfNmVTtj2Zrc89uJ3P7V-rqaEpIRjLLNK15cFX5J1BoJuoz4MKESpECBEK4DS6QUVJYN7bq-Xq_7RIsYaahh5G0cW3ZxxuFbrHI8YU3n4QWvTpTUJ9zEQFtgPLwt50VIOteT"/>
-                            <div class="event-overlay absolute inset-0 bg-primary/20 opacity-0 transition-opacity duration-300 flex items-center justify-center">
-                                <span class="bg-primary text-on-primary px-6 py-2 rounded-full font-bold shadow-lg">Comprar Tickets</span>
-                            </div>
-                        </div>
-                        <div class="p-4 space-y-1 flex-1 flex flex-col">
-                            <h3 class="text-lg font-bold text-on-surface line-clamp-1">Sombras de la Ciudad</h3>
-                            <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
-                                <span class="material-symbols-outlined text-[18px]">calendar_today</span>
-                                <span>Mañana, 19:15</span>
-                            </div>
-                            <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
-                                <span class="material-symbols-outlined text-[18px]">location_on</span>
-                                <span>Sala 02 - VIP</span>
-                            </div>
-                            <div class="pt-3 mt-auto flex justify-between items-center border-t border-outline-variant/30">
-                                <span class="text-[10px] font-bold text-on-surface-variant uppercase">Desde</span>
-                                <span class="text-lg font-bold text-primary">$180.00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Movie 3 -->
-                    <div onclick="showSeatsView('El Susurro del Viento')" class="group event-card bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-300 cursor-pointer flex flex-col h-full">
-                        <div class="relative aspect-[2/3] overflow-hidden">
-                            <img alt="Cinema Poster 3" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC98qGtPIVQcdgVnQbIGjxNYyK_D3FbWALjQSx5BhsTdCjdzXe2HmyDWPKN_2wKOWnpKcIy7G1hzowWNnyuFBY7u3pWNIAfNEgA2pIRGtBrNGrho6GL4YlNapktKQufLPOMe2SwfmTkV2jvLDSobEbKd7ZcOoRidy8_ZkXWXJgVbBu-FznWH53ivWGNafdbyHudUMwXDEP5jmf0O87k-Hr7CC_wcaeuSCkIDVtpQnOEIFMdFfxUWmgbnUnDoiuTk23Gu4_mahq9DRtK"/>
-                            <div class="absolute top-3 right-3 bg-error text-white px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase">LAST CHANCE</div>
-                            <div class="event-overlay absolute inset-0 bg-primary/20 opacity-0 transition-opacity duration-300 flex items-center justify-center">
-                                <span class="bg-primary text-on-primary px-6 py-2 rounded-full font-bold shadow-lg">Comprar Tickets</span>
-                            </div>
-                        </div>
-                        <div class="p-4 space-y-1 flex-1 flex flex-col">
-                            <h3 class="text-lg font-bold text-on-surface line-clamp-1">El Susurro del Viento</h3>
-                            <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
-                                <span class="material-symbols-outlined text-[18px]">calendar_today</span>
-                                <span>Hoy, 22:30</span>
-                            </div>
-                            <div class="flex items-center gap-1.5 text-on-surface-variant text-sm">
-                                <span class="material-symbols-outlined text-[18px]">location_on</span>
-                                <span>Sala 01 - Standard</span>
-                            </div>
-                            <div class="pt-3 mt-auto flex justify-between items-center border-t border-outline-variant/30">
-                                <span class="text-[10px] font-bold text-on-surface-variant uppercase">Desde</span>
-                                <span class="text-lg font-bold text-primary">$95.00</span>
-                            </div>
-                        </div>
-                    </div>
+                        }
+                    }
                 </div>
             </div>
         </section>

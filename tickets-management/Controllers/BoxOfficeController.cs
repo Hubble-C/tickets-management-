@@ -31,15 +31,20 @@ namespace tickets_management.Controllers
         public async Task<IActionResult> Login(string username, string password)
         {
             var response = await _login.Login(username, password);
-
+            
             if (response != null && response.Success)
             {
                 HttpContext.Session.SetString("Username", username);
                 HttpContext.Session.SetString("JWToken", response.Data.Token);
                 return RedirectToAction("Pos");
             }
-
-            ModelState.AddModelError(string.Empty, "Credenciales incorrectas o no tienes permisos de Seller.");
+            else
+            {
+                ViewBag.Message = response?.Message ?? "Login failed";
+                ViewBag.Success = false;
+                
+                ModelState.AddModelError(string.Empty, "Credenciales incorrectas o no tienes permisos de Seller.");
+            }
             return View();
         }
 
@@ -87,7 +92,7 @@ namespace tickets_management.Controllers
                 };
             }
 
-            // Siempre retorna View (con layout), nunca PartialView aquí
+
             return View(orderSummary);
         }
 

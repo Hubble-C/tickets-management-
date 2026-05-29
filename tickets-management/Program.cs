@@ -32,6 +32,9 @@ var SalesConnectionString = builder.Configuration.GetConnectionString("DbSalesCo
 builder.Services.AddDbContext<MySqlDbContext>(options =>
     options.UseMySql(SalesConnectionString, ServerVersion.AutoDetect(SalesConnectionString)));
 
+
+
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {   
     options.TokenValidationParameters = new TokenValidationParameters
