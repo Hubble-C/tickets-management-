@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<ILogin, LoginService>();
 builder.Services.AddTransient<IPasswordHasher<AspNetUsers>, PasswordHasher<AspNetUsers>>();
-builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddSingleton<IOrderService, OrderService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {

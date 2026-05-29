@@ -2,113 +2,122 @@ using System.Collections.Concurrent;
 using tickets_management.Models;
 using tickets_management.Models.ViewModels;
 using tickets_management.Services.Interfaces;
-using System.Collections.Concurrent;
-using Azure.Identity;
 using tickets_management.Data;
 using tickets_management.Enums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace tickets_management.Services;
+
 
 public class OrderService : IOrderService
 {
     private readonly ConcurrentDictionary<string, TempOrder> _orders = new();
-    private readonly MySqlDbContext _context;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    public OrderService(MySqlDbContext context)
+    public OrderService(IServiceScopeFactory scopeFactory)
     {
-        _context = context;
+        _scopeFactory = scopeFactory;
     }
-    
-    public  Task AddSeatAsync(string username, string seatId)
+
+    public Task AddSeatAsync(string username, SeatViewModel seatVm)
     {
-        int convertedNumber;
-        
         var order = _orders.GetOrAdd(username, _ => new TempOrder()
         {
             SelectedSeats = new List<Seat>(),
             Subtotal = 0,
             Total = 0
-            
         });
+
         
-        if (int.TryParse(seatId, out convertedNumber))
+        var parts = seatVm.Id?.Split('-');
+        var rowChar = (parts != null && parts.Length > 0 && parts[0].Length == 1)
+            ? parts[0][0]
+            : seatVm.Row?.Length > 0 ? seatVm.Row[0] : 'A';
+
+        var label = seatVm.Zone?.ToUpper() == "VIP" ? LabelZone.VIP : LabelZone.GENERAL;
+
+        lock (order.SelectedSeats)
         {
-            lock (order.SelectedSeats)
+            if (!order.SelectedSeats.Any(s => s.Row == rowChar && s.SeatNumber == seatVm.Num))
             {
-                if (!order.SelectedSeats.Any(s => s.SeatNumber == convertedNumber))
+                order.SelectedSeats.Add(new Seat
                 {
-                    var newSeat = new Seat
-                    {
-                        SeatNumber = convertedNumber
-                    };
-                    order.SelectedSeats.Add(newSeat);
-                }
+                    Row        = rowChar,
+                    SeatNumber = seatVm.Num,
+                    Zone      = label,
+                    Price      = seatVm.Price
+                });
             }
-            
+
+            order.Subtotal = order.SelectedSeats.Sum(s => s.Price);
+            order.Tax      = Math.Round(order.Subtotal * 0.21m, 2);
+            order.Total    = order.Subtotal + order.Tax - order.Discount;
         }
-        
+
         return Task.CompletedTask;
     }
 
-    public  Task RemoveSeatAsync(string username, string seatId)
+    public Task RemoveSeatAsync(string username, string seatId)
     {
-        int convertedNumber;
-        
-        var order = _orders.GetOrAdd(username, _ => new TempOrder
+        if (_orders.TryGetValue(username, out var order))
         {
-            SelectedSeats = new List<Seat>()
-        });
-        
-        if (_orders.TryGetValue(username, out order) && int.TryParse(seatId, out convertedNumber))
-        {
-            lock (order.SelectedSeats)
+            var parts = seatId?.Split('-');
+            if (parts != null && parts.Length == 2
+                && parts[0].Length == 1
+                && int.TryParse(parts[1], out var num))
             {
-                order.SelectedSeats.RemoveAll(s => s.SeatNumber == convertedNumber);
+                var rowChar = parts[0][0];
+                lock (order.SelectedSeats)
+                {
+                    order.SelectedSeats.RemoveAll(s => s.Row == rowChar && s.SeatNumber == num);
+                    order.Subtotal = order.SelectedSeats.Sum(s => s.Price);
+                    order.Tax      = Math.Round(order.Subtotal * 0.21m, 2);
+                    order.Total    = order.Subtotal + order.Tax - order.Discount;
+                }
             }
         }
-        
+
         return Task.CompletedTask;
     }
 
     public async Task SaveOrderAsync(TempOrder tempOrder)
     {
-        var orderValue = _orders.TryGetValue(tempOrder.OrderId, out var order );
+        var found = _orders.TryGetValue(tempOrder.OrderId, out _);
 
-        var OrderEntity = new Order
+        var orderEntity = new Order
         {
             CreatedAt = DateTime.UtcNow,
-            Status = OrderStatus.Pending,
-            Items = new List<OrderItem>(),
+            Status    = OrderStatus.Pending,
+            Items     = new List<OrderItem>(),
         };
-        
+
         foreach (var seat in tempOrder.SelectedSeats)
         {
-            var item = new OrderItem
+            orderEntity.Items.Add(new OrderItem
             {
                 Quantity = 1,
-                Fee = tempOrder.ServiceRate,
+                Fee      = tempOrder.ServiceRate,
                 SubTotal = tempOrder.Subtotal,
-                Total = tempOrder.Total,
-                EventId = int.Parse(tempOrder.EventId),
-            };
-            OrderEntity.Items.Add(item);
+                Total    = tempOrder.Total,
+                EventId  = int.Parse(tempOrder.EventId),
+            });
         }
-        
-        if (orderValue == true)
+
+        if (found)
         {
-            await _context.Orders.AddAsync(OrderEntity);
-            await _context.SaveChangesAsync();
+           
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<MySqlDbContext>();
+            await context.Orders.AddAsync(orderEntity);
+            await context.SaveChangesAsync();
             _orders.TryRemove(tempOrder.OrderId, out _);
         }
     }
 
     public Task<TempOrder?> GetOrderAsync(string orderId)
     {
-        if (_orders.TryGetValue(orderId, out var order))
-        {
-            return Task.FromResult<TempOrder?>(order);
-        }
-        return Task.FromResult<TempOrder?>(null);
+        _orders.TryGetValue(orderId, out var order);
+        return Task.FromResult<TempOrder?>(order);
     }
 
     public Task ClearOrderAsync(string orderId)

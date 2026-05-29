@@ -100,11 +100,13 @@
                 <span class="material-symbols-outlined">receipt</span>
                 Generar Factura
             </button>
-            <a asp-action="Pos" asp-controller="BoxOffice">
-                <button type="button" class="w-full border border-primary text-primary font-headline-md py-md rounded-lg hover:bg-primary/5 transition-all font-bold">
+            <form asp-action="CancelOrder" asp-controller="BoxOffice" method="post">
+                <button type="submit" class="w-full border border-primary text-primary 
+            font-headline-md py-md rounded-lg hover:bg-primary/5 
+            transition-all font-bold">
                     Cancelar Transacción
                 </button>
-            </a>
+            </form>
         </div>
     </div>
 
