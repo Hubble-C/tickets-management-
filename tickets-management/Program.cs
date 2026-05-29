@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using tickets_management.Data;
 using tickets_management.Models;
+using tickets_management.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<ILogin, LoginService>();
 builder.Services.AddTransient<IPasswordHasher<AspNetUsers>, PasswordHasher<AspNetUsers>>();
 builder.Services.AddSingleton<IOrderService, OrderService>();
+builder.Services.AddTransient<IDbConnectionFactory, DbConnectionFactory>();
+builder.Services.AddTransient<LoginValidator>();
+builder.Services.AddTransient<IEventService, EventService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -25,15 +29,9 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-var AuthConnectionString = builder.Configuration.GetConnectionString("DbAuthConnection");
-builder.Services.AddTransient<IDbConnection>(sp => new MySqlConnection(AuthConnectionString));
-
 var SalesConnectionString = builder.Configuration.GetConnectionString("DbSalesConnection");
 builder.Services.AddDbContext<MySqlDbContext>(options =>
     options.UseMySql(SalesConnectionString, ServerVersion.AutoDetect(SalesConnectionString)));
-
-
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {   

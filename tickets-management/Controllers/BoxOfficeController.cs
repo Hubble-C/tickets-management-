@@ -12,11 +12,13 @@ namespace tickets_management.Controllers
     {
         private readonly ILogin _login;
         private readonly IOrderService _orderService;
+        private readonly IEventService _eventService;
 
-        public BoxOfficeController(ILogin login, IOrderService orderService)
+        public BoxOfficeController(ILogin login, IOrderService orderService,  IEventService eventService)
         {
             _orderService = orderService;
             _login = login;
+            _eventService = eventService;
         }
 
         [HttpGet]
@@ -106,14 +108,13 @@ namespace tickets_management.Controllers
         [HttpGet]
         public async Task<IActionResult> Pos()
         {
-            var username = HttpContext.Session.GetString("Username");
-            var token    = HttpContext.Session.GetString("JWToken");
-
+            var token = HttpContext.Session.GetString("JWToken");
             if (string.IsNullOrEmpty(token))
                 return RedirectToAction("Login");
+ 
+            var events = await _eventService.GetActiveEventsAsync();
+            return View(events);
 
-            var tempOrder = await _orderService.GetOrderAsync(username);
-            return View(tempOrder);
         }
 
         [HttpPost]
