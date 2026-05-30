@@ -5,7 +5,7 @@ using tickets_management.Models.ViewModels;
 using tickets_management.Enums;
 using tickets_management.Models;
 using tickets_management.Services.Interfaces;
-
+using Dapper;
 namespace tickets_management.Controllers
 {
     public class BoxOfficeController : Controller
@@ -13,12 +13,14 @@ namespace tickets_management.Controllers
         private readonly ILogin _login;
         private readonly IOrderService _orderService;
         private readonly IEventService _eventService;
+        private readonly IDbConnectionFactory _dbConnectionFactory;
 
-        public BoxOfficeController(ILogin login, IOrderService orderService, IEventService eventService)
+        public BoxOfficeController(ILogin login, IOrderService orderService, IEventService eventService, IDbConnectionFactory dbConnectionFactory)
         {
             _orderService = orderService;
             _login = login;
             _eventService = eventService;
+            _dbConnectionFactory = dbConnectionFactory;
         }
 
         [HttpGet]
@@ -73,9 +75,11 @@ namespace tickets_management.Controllers
             // También incluimos los asientos en proceso de compra ahora mismo (Singleton)
             var username = HttpContext.Session.GetString("Username");
             var currentOrder = await _orderService.GetOrderAsync(username);
-            var pendingSeats = currentOrder?.SelectedSeats
-                .Select(s => $"{s.Row}-{s.SeatNumber}")
-                .ToList() ?? new List<string>();
+            var pendingSeats = currentOrder != null && currentOrder.EventId == eventId.ToString()
+                ? currentOrder.SelectedSeats
+                    .Select(s => $"{s.Row}-{s.SeatNumber}")
+                    .ToList()
+                : new List<string>();
 
             return Json(new
             {
@@ -179,7 +183,7 @@ namespace tickets_management.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Checkout(string PaymentMethod)
+        public async Task<IActionResult> Checkout(string TypePayment, string Name, string Email, string ExistingEmail, string Phone)
         {
             var username = HttpContext.Session.GetString("Username");
             var token    = HttpContext.Session.GetString("JWToken");
@@ -190,13 +194,54 @@ namespace tickets_management.Controllers
             var tempOrder = await _orderService.GetOrderAsync(username);
             if (tempOrder != null)
             {
-                await _orderService.SaveOrderAsync(tempOrder);
-                await _orderService.ClearOrderAsync(username);
-                return RedirectToAction("PrintTicket", new
+                var savedOrder = await _orderService.SaveOrderAsync(tempOrder);
+
+                // Insert User in db_public.users 
+                var finalEmail = !string.IsNullOrEmpty(Email) ? Email : ExistingEmail;
+                if (!string.IsNullOrEmpty(finalEmail) && !string.IsNullOrEmpty(Name))
                 {
-                    orderNumber = tempOrder.Id,
-                    total       = tempOrder.Total.ToString("F2"),
-                });
+                    try
+                    {
+                        var randomPassword = Guid.NewGuid().ToString("N").Substring(0, 8);
+                        using var publicConn = _dbConnectionFactory.GetPublicConnection();
+                        var queryUser = "INSERT INTO users (name, email, phone, password, created_at) VALUES (@Name, @Email, @Phone, @Password, NOW())";
+                        await publicConn.ExecuteAsync(queryUser, new { Name, Email = finalEmail, Phone, Password = randomPassword });
+                    }
+                    catch { /* Handle error or ignore if user already exists */ }
+                }
+
+                var generatedTickets = new List<string>();
+
+                // Insert Tickets in db_sales.tickets
+                if (savedOrder != null)
+                {
+                    try
+                    {
+                        using var salesConn = _dbConnectionFactory.GetSalesConnection();
+                        var queryTicket = @"INSERT INTO tickets (order_item_id, event_id, seat, ticket_code, status, created_at, updated_at) 
+                                            VALUES (@OrderItemId, @EventId, @Seat, @TicketCode, 'Active', NOW(), NOW())";
+                        
+                        var itemsList = savedOrder.Items.ToList();
+                        for (int i = 0; i < tempOrder.SelectedSeats.Count && i < itemsList.Count; i++)
+                        {
+                            var seat = tempOrder.SelectedSeats[i];
+                            var orderItem = itemsList[i];
+                            var seatStr = $"{seat.Row}-{seat.SeatNumber}";
+                            var ticketCode = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
+                            generatedTickets.Add(ticketCode);
+                            
+                            await salesConn.ExecuteAsync(queryTicket, new { OrderItemId = orderItem.Id, EventId = orderItem.EventId, Seat = seatStr, TicketCode = ticketCode });
+                        }
+                    }
+                    catch { }
+                }
+
+                await _orderService.ClearOrderAsync(username);
+
+                // Pasar los códigos de ticket generados al TempData para mostrar el modal en Pos
+                TempData["OrderSuccess"] = $"Factura generada. Tickets: {string.Join(", ", generatedTickets)}";
+
+                return RedirectToAction("Pos");
             }
             return RedirectToAction("Pos");
         }

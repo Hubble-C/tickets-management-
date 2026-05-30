@@ -56,6 +56,20 @@
                         <span class="material-symbols-outlined text-lg">logout</span>
                         Logout
                     </a>
+                    @if (TempData["OrderSuccess"] != null)
+                    {
+                        <div id="successModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+                            <div class="bg-surface p-xl rounded-2xl shadow-xl max-w-md w-full text-center border border-outline-variant">
+                                <span class="material-symbols-outlined text-5xl text-primary mb-md">check_circle</span>
+                                <h2 class="font-headline-md text-headline-md text-on-surface font-bold mb-xs">¡Factura Generada!</h2>
+                                <p class="text-on-surface-variant font-body-md mb-lg">@TempData["OrderSuccess"]</p>
+                                <button onclick="document.getElementById('successModal').style.display='none'" class="w-full bg-primary text-on-primary py-md rounded-lg font-bold hover:opacity-90 transition-all">
+                                    Continuar
+                                </button>
+                            </div>
+                        </div>
+                    }
+
                     <div class="h-8 w-px bg-outline-variant"></div>
                     <div class="flex items-center gap-4">
                         <button class="p-1.5 rounded-full hover:bg-secondary-container/50 transition-all relative">
@@ -166,17 +180,18 @@
                             <label class="text-[10px] text-on-surface-variant opacity-70 uppercase font-bold">Categoría</label>
                             <select id="select-category-filter" onchange="filterSeatsBySelectors()" class="bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5 text-sm min-w-[140px] outline-none">
                                 <option value="Todas">Todas</option>
-                                <option value="VIP">VIP</option>
-                                <option value="General">General</option>
+                                <option value="Platea Baja">Platea Baja</option>
+                                <option value="Platea Media">Platea Media</option>
+                                <option value="Platea Alta">Platea Alta</option>
                             </select>
                         </div>
                         <div class="flex flex-col gap-1">
                             <label class="text-[10px] text-on-surface-variant opacity-70 uppercase font-bold">Sección</label>
                             <select id="select-section-filter" onchange="filterSeatsBySelectors()" class="bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-1.5 text-sm min-w-[140px] outline-none">
                                 <option value="Todas">Todas las filas</option>
-                                <option value="Platea Baja">VIP (Filas A-C)</option>
-                                <option value="Platea Alta">General (Filas D-G)</option>
-                                <option value="Palcos">General (Filas H-J)</option>
+                                <option value="Platea Baja">Platea Baja (A-C)</option>
+                                <option value="Platea Media">Platea Media (D-G)</option>
+                                <option value="Platea Alta">Platea Alta (H-J)</option>
                             </select>
                         </div>
                     </div>
@@ -205,11 +220,15 @@
                             <div class="h-4 w-[1px] bg-outline-variant mx-2"></div>
                             <div class="flex items-center gap-2">
                                 <div class="w-4 h-4 rounded bg-tertiary"></div>
-                                <span id="legend-vip-price">VIP</span>
+                                <span id="legend-vip-price">BAJA</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <div class="w-4 h-4 rounded bg-primary-container"></div>
-                                <span id="legend-general-price">GENERAL</span>
+                                <span id="legend-general-price">MEDIA</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 rounded bg-secondary-container"></div>
+                                <span id="legend-alta-price">ALTA</span>
                             </div>
                         </div>
 
@@ -278,8 +297,9 @@
     // --- Configuración Global de Precios por Zona ---
     // Cargados desde la BD al abrir cada evento, no hardcodeados
     let PRICING_RULES = {
-        VIP:     { price: 0, label: 'ZONA VIP',     icon: 'stars' },
-        GENERAL: { price: 0, label: 'ZONA GENERAL', icon: 'chair' }
+        'PLATEA BAJA':  { price: 0, label: 'PLATEA BAJA',  icon: 'stars',      css: 'tertiary' },
+        'PLATEA MEDIA': { price: 0, label: 'PLATEA MEDIA', icon: 'chair',      css: 'primary' },
+        'PLATEA ALTA':  { price: 0, label: 'PLATEA ALTA',  icon: 'event_seat', css: 'secondary' }
     };
     const SERVICE_CHARGE_RATE = 0.07;
 
@@ -300,14 +320,19 @@
         // Actualizar precios reales desde TicketTypes de db_catalog
         data.ticketTypes.forEach(tt => {
             const key = tt.name.toUpperCase();
-            if (PRICING_RULES[key]) {
-                PRICING_RULES[key].price = parseFloat(tt.price);
+            if (key.includes('BAJA')) {
+                PRICING_RULES['PLATEA BAJA'].price = parseFloat(tt.price);
+            } else if (key.includes('MEDIA')) {
+                PRICING_RULES['PLATEA MEDIA'].price = parseFloat(tt.price);
+            } else if (key.includes('ALTA')) {
+                PRICING_RULES['PLATEA ALTA'].price = parseFloat(tt.price);
             }
         });
 
         // Actualizar leyenda con precios reales
-        document.getElementById('legend-vip-price').textContent     = `VIP ($${PRICING_RULES.VIP.price.toFixed(2)})`;
-        document.getElementById('legend-general-price').textContent = `GENERAL ($${PRICING_RULES.GENERAL.price.toFixed(2)})`;
+        document.getElementById('legend-vip-price').textContent     = `BAJA ($${PRICING_RULES['PLATEA BAJA'].price.toFixed(2)})`;
+        document.getElementById('legend-general-price').textContent = `MEDIA ($${PRICING_RULES['PLATEA MEDIA'].price.toFixed(2)})`;
+        document.getElementById('legend-alta-price').textContent = `ALTA ($${PRICING_RULES['PLATEA ALTA'].price.toFixed(2)})`;
 
         // Ocupados = vendidos en db_sales + en proceso de compra ahora (Singleton)
         return [...data.occupiedSeats, ...data.pendingSeats];
@@ -318,8 +343,9 @@
         const occupiedSet = new Set(occupiedSeats);
 
         gridTarget.innerHTML = rowsArr.map(row => {
-            const isVip = ['A', 'B', 'C'].includes(row);
-            const zone  = isVip ? 'VIP' : 'GENERAL';
+            let zone = 'PLATEA BAJA';
+            if (['D', 'E', 'F', 'G'].includes(row)) zone = 'PLATEA MEDIA';
+            else if (['H', 'I', 'J'].includes(row)) zone = 'PLATEA ALTA';
 
             return `
                 <div data-row-letter="${row}" class="seat-row-container flex items-center gap-4 transition-all duration-200">
@@ -333,9 +359,11 @@
                     return `<button disabled class="w-6 h-6 rounded-sm bg-outline-variant text-white text-[10px] font-mono cursor-not-allowed opacity-40 flex items-center justify-center pointer-events-none">X</button>`;
                 }
 
-                const zoneClasses = isVip
+                const zoneClasses = zone === 'PLATEA BAJA'
                     ? 'bg-surface-container text-tertiary border border-tertiary/20 hover:ring-2 hover:ring-tertiary/50'
-                    : 'bg-surface-container text-primary border border-primary/20 hover:ring-2 hover:ring-primary/50';
+                    : zone === 'PLATEA MEDIA'
+                    ? 'bg-surface-container text-primary border border-primary/20 hover:ring-2 hover:ring-primary/50'
+                    : 'bg-surface-container text-secondary border border-secondary/20 hover:ring-2 hover:ring-secondary/50';
 
                 return `
                                 <button
@@ -379,14 +407,22 @@
 
     function applySeatStyle(btn, zone, isSelected) {
         if (isSelected) {
-            btn.classList.remove('bg-surface-container', 'text-tertiary', 'text-primary');
-            btn.classList.add('bg-primary', 'text-white', 'ring-2', 'ring-primary', 'scale-110');
-        } else {
-            btn.classList.remove('bg-primary', 'text-white', 'ring-2', 'ring-primary', 'scale-110');
-            if (zone === 'VIP') {
-                btn.classList.add('bg-surface-container', 'text-tertiary');
+            btn.classList.remove('bg-surface-container', 'text-tertiary', 'text-primary', 'text-secondary');
+            if(zone === 'PLATEA BAJA') {
+                btn.classList.add('bg-tertiary', 'text-white', 'ring-2', 'ring-tertiary', 'scale-110');
+            } else if(zone === 'PLATEA MEDIA') {
+                btn.classList.add('bg-primary', 'text-white', 'ring-2', 'ring-primary', 'scale-110');
             } else {
+                btn.classList.add('bg-secondary', 'text-white', 'ring-2', 'ring-secondary', 'scale-110');
+            }
+        } else {
+            btn.classList.remove('bg-tertiary', 'bg-primary', 'bg-secondary', 'text-white', 'ring-2', 'ring-tertiary', 'ring-primary', 'ring-secondary', 'scale-110');
+            if (zone === 'PLATEA BAJA') {
+                btn.classList.add('bg-surface-container', 'text-tertiary');
+            } else if (zone === 'PLATEA MEDIA') {
                 btn.classList.add('bg-surface-container', 'text-primary');
+            } else {
+                btn.classList.add('bg-surface-container', 'text-secondary');
             }
         }
     }
@@ -421,12 +457,12 @@
                 return `
                     <div class="p-4 rounded-lg bg-surface-container-lowest border border-outline-variant flex items-center justify-between group hover:border-primary transition-colors">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg ${seat.zone === 'VIP' ? 'bg-tertiary/10 text-tertiary' : 'bg-primary/10 text-primary'} flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-lg ${rules.css === 'tertiary' ? 'bg-tertiary/10 text-tertiary' : rules.css === 'primary' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'} flex items-center justify-center">
                                 <span class="material-symbols-outlined">${rules.icon}</span>
                             </div>
                             <div>
                                 <p class="font-bold text-on-surface text-sm">Asiento ${seat.id}</p>
-                                <p class="text-[10px] font-bold ${seat.zone === 'VIP' ? 'text-tertiary' : 'text-primary'} uppercase">${rules.label}</p>
+                                <p class="text-[10px] font-bold ${rules.css === 'tertiary' ? 'text-tertiary' : rules.css === 'primary' ? 'text-primary' : 'text-secondary'} uppercase">${rules.label}</p>
                             </div>
                         </div>
                         <div class="text-right">
@@ -493,17 +529,20 @@
 
         rows.forEach(rowView => {
             const rowLetter = rowView.dataset.rowLetter;
-            const isVipRow  = ['A', 'B', 'C'].includes(rowLetter);
+            const isBaja  = ['A', 'B', 'C'].includes(rowLetter);
+            const isMedia = ['D', 'E', 'F', 'G'].includes(rowLetter);
+            const isAlta  = ['H', 'I', 'J'].includes(rowLetter);
 
             let matchesCategory = true;
             let matchesSection  = true;
 
-            if (category === 'VIP' && !isVipRow)    matchesCategory = false;
-            if (category === 'General' && isVipRow) matchesCategory = false;
+            if (category === 'Platea Baja' && !isBaja) matchesCategory = false;
+            if (category === 'Platea Media' && !isMedia) matchesCategory = false;
+            if (category === 'Platea Alta' && !isAlta) matchesCategory = false;
 
-            if (section === 'Platea Baja' && !['A', 'B', 'C'].includes(rowLetter))      matchesSection = false;
-            if (section === 'Platea Alta' && !['D', 'E', 'F', 'G'].includes(rowLetter)) matchesSection = false;
-            if (section === 'Palcos'      && !['H', 'I', 'J'].includes(rowLetter))      matchesSection = false;
+            if (section === 'Platea Baja' && !isBaja) matchesSection = false;
+            if (section === 'Platea Media' && !isMedia) matchesSection = false;
+            if (section === 'Platea Alta' && !isAlta) matchesSection = false;
 
             rowView.classList.toggle('hidden', !(matchesCategory && matchesSection));
         });

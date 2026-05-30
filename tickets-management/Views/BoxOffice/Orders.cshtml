@@ -62,7 +62,7 @@
 </header>
 
 <main class="ml-64 mt-16 p-xl min-h-[calc(100vh-4rem)]">
-    <div class="grid grid-cols-12 gap-xl max-w-7xl mx-auto">
+    <form id="form-pos" method="post" asp-action="Checkout" asp-controller="BoxOffice" class="grid grid-cols-12 gap-xl max-w-7xl mx-auto">
         
         <div class="col-span-7 flex flex-col gap-lg">
             <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm h-full">
@@ -76,25 +76,21 @@
                 </div>
                 
                 <div id="form-new" class="space-y-lg">
-                    <div class="grid grid-cols-2 gap-md">
+                    <div class="grid grid-cols-1 gap-md">
                         <div class="flex flex-col gap-xs">
                             <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Nombre Completo</label>
-                            <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Ej. Juan Pérez" type="text"/>
-                        </div>
-                        <div class="flex flex-col gap-xs">
-                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Identificación (ID)</label>
-                            <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="00000000-0" type="text"/>
+                            <input name="Name" class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Ej. Juan Pérez" type="text"/>
                         </div>
                     </div>
                     
                     <div class="flex flex-col gap-xs">
                         <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Correo Electrónico</label>
-                        <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="juan.perez@email.com" type="email"/>
+                        <input name="Email" class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="juan.perez@email.com" type="email"/>
                     </div>
                     
                     <div class="flex flex-col gap-xs">
                         <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Teléfono (Opcional)</label>
-                        <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="+34 000 000 000" type="tel"/>
+                        <input name="Phone" class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="+34 000 000 000" type="tel"/>
                     </div>
                     
                     <div class="pt-md border-t border-outline-variant">
@@ -117,7 +113,7 @@
                 <div id="form-existing" class="hidden space-y-lg">
                     <div class="flex flex-col gap-xs">
                         <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Correo Electrónico del Cliente</label>
-                        <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none" placeholder="correo@ejemplo.com" type="email" name="Email" required/>
+                        <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none" placeholder="correo@ejemplo.com" type="email" name="ExistingEmail" />
                     </div>
                     <p class="text-sm text-on-surface-variant">Ingrese el correo registrado para buscar el perfil del cliente.</p>
                 </div>
@@ -127,7 +123,7 @@
         <div class="col-span-5 flex flex-col gap-lg" id="contenedor-resumen">
             <partial name="_ResumenPedido" model="Model"/>
         </div>
-    </div>
+    </form>
 </main>
 
 <script>

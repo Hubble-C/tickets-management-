@@ -26,7 +26,8 @@ public class OrderService : IOrderService
         {
             SelectedSeats = new List<Seat>(),
             Subtotal = 0,
-            Total = 0
+            Total = 0,
+            OrderId = username
         });
 
         
@@ -81,15 +82,19 @@ public class OrderService : IOrderService
         return Task.CompletedTask;
     }
 
-    public async Task SaveOrderAsync(TempOrder tempOrder)
+    public async Task<Order?> SaveOrderAsync(TempOrder tempOrder)
     {
         var found = _orders.TryGetValue(tempOrder.OrderId, out _);
 
         var orderEntity = new Order
         {
-            CreatedAt = DateTime.UtcNow,
-            Status    = OrderStatus.Pending,
-            Items     = new List<OrderItem>(),
+            Nit           = "INV-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
+            CreatedAt     = DateTime.UtcNow,
+            Status        = OrderStatus.Paid,
+            HourAt        = TimeOnly.FromDateTime(DateTime.UtcNow),
+            PaymentMethod = TypePayment.Cash,
+            CustomerId    = 1, // Default to a general customer if not specified
+            Items         = new List<OrderItem>(),
         };
 
         foreach (var seat in tempOrder.SelectedSeats)
@@ -112,7 +117,10 @@ public class OrderService : IOrderService
             await context.Orders.AddAsync(orderEntity);
             await context.SaveChangesAsync();
             _orders.TryRemove(tempOrder.OrderId, out _);
+            return orderEntity;
         }
+
+        return null;
     }
 
     public Task<TempOrder?> GetOrderAsync(string orderId)

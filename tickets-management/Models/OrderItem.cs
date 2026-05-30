@@ -6,7 +6,11 @@ public class OrderItem : BaseEntity
 {
     public int Quantity { get; set; }
     public decimal PriceTicket { get; set; }
+    
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
     public decimal SubTotal { get; set; }
+    
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
     public decimal Fee { get; set; }
     public decimal Total { get; set; }
     public Order Order { get; set; }

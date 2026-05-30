@@ -100,13 +100,11 @@
                 <span class="material-symbols-outlined">receipt</span>
                 Generar Factura
             </button>
-            <form asp-action="CancelOrder" asp-controller="BoxOffice" method="post">
-                <button type="submit" class="w-full border border-primary text-primary 
+                <button type="submit" formaction="/BoxOffice/CancelOrder" formmethod="post" formnovalidate class="w-full border border-primary text-primary
             font-headline-md py-md rounded-lg hover:bg-primary/5 
             transition-all font-bold">
                     Cancelar Transacción
                 </button>
-            </form>
         </div>
     </div>
 
@@ -130,24 +128,6 @@
 
         const datosFormulario = new FormData(formulario);
 
-        fetch('/BoxOffice/CalcularResumen', {
-            method: 'POST',
-            body: datosFormulario
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Error en la respuesta del servidor");
-                }
-                return response.text();
-            })
-            .then(htmlFresco => {
-                const contenedor = document.getElementById('contenedor-resumen');
-                if (contenedor) {
-                    contenedor.innerHTML = htmlFresco;
-                }
-            })
-            .catch(error => {
-                console.error("Error en la sincronización del POS:", error);
-            });
+        // Removemos fetch a CalcularResumen ya que el endpoint no existe y rompe el script
     }
 </script>
