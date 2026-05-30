@@ -228,7 +228,7 @@ namespace tickets_management.Controllers
                             var orderItem = itemsList[i];
                             var seatStr = $"{seat.Row}-{seat.SeatNumber}";
                             var ticketCode = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper();
-                            generatedTickets.Add(ticketCode);
+                            generatedTickets.Add($"{ticketCode}|{seatStr}");
                             
                             await salesConn.ExecuteAsync(queryTicket, new { OrderItemId = orderItem.Id, EventId = orderItem.EventId, Seat = seatStr, TicketCode = ticketCode });
                         }
@@ -238,33 +238,35 @@ namespace tickets_management.Controllers
 
                 await _orderService.ClearOrderAsync(username);
 
-                // Pasar los códigos de ticket generados al TempData para mostrar el modal en Pos
-                TempData["OrderSuccess"] = $"Factura generada. Tickets: {string.Join(", ", generatedTickets)}";
+                // TempData["OrderSuccess"] = $"Factura generada. Tickets: {string.Join(", ", generatedTickets)}";
 
-                return RedirectToAction("Pos");
+                return RedirectToAction("PrintTicket", new { 
+                    orderNumber = savedOrder.Id.ToString(),
+                    eventId = int.Parse(tempOrder.EventId),
+                    hourAt = DateTime.Now.ToString("HH:mm"),
+                    tickets = string.Join(",", generatedTickets)
+                });
             }
             return RedirectToAction("Pos");
         }
 
         [HttpGet]
-        public IActionResult PrintTicket(string orderNumber, string showName, string showTime,
-            string hall, string seats, string email, string paymentMethod,
-            string subtotal, string serviceFee, string total)
+        public async Task<IActionResult> PrintTicket(string orderNumber, int eventId, string hourAt, string tickets)
         {
             var token = HttpContext.Session.GetString("JWToken");
             if (string.IsNullOrEmpty(token))
                 return RedirectToAction("Login");
 
-            ViewData["OrderNumber"]   = orderNumber;
-            ViewData["ShowName"]      = showName;
-            ViewData["ShowTime"]      = showTime;
-            ViewData["Hall"]          = hall;
-            ViewData["Seats"]         = seats;
-            ViewData["Email"]         = email;
-            ViewData["PaymentMethod"] = paymentMethod;
-            ViewData["Subtotal"]      = subtotal;
-            ViewData["ServiceFee"]    = serviceFee;
-            ViewData["Total"]         = total;
+            var events = await _eventService.GetActiveEventsAsync();
+            var currentEvent = events.FirstOrDefault(e => e.Id == eventId);
+
+            ViewData["OrderNumber"] = orderNumber;
+            ViewData["EventName"] = currentEvent?.Name ?? "Evento";
+            ViewData["Date"] = currentEvent?.StartDate.ToString("dd/MM/yyyy") ?? DateTime.Now.ToString("dd/MM/yyyy");
+            ViewData["Venue"] = currentEvent?.VenueName ?? "Teatro Central";
+            ViewData["HourAt"] = hourAt;
+            ViewData["Tickets"] = tickets;
+
             return View();
         }
 
