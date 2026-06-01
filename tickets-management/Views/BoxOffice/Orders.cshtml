@@ -68,35 +68,35 @@
             <div class="bg-surface-container-lowest p-xl rounded-xl border border-outline-variant shadow-sm h-full">
                 <div class="flex border-b border-outline-variant mb-xl">
                     <button type="button" class="px-xl py-md font-headline-md text-headline-md text-primary border-b-2 border-primary transition-all duration-200" id="tab-new">
-                        Registrar Nuevo Usuario
+                        Register New User
                     </button>
                     <button type="button" class="px-xl py-md font-headline-md text-headline-md text-on-surface-variant hover:text-primary transition-all duration-200" id="tab-existing">
-                        Cliente Existente
+                        Existing Customer
                     </button>
                 </div>
                 
                 <div id="form-new" class="space-y-lg">
                     <div class="grid grid-cols-1 gap-md">
                         <div class="flex flex-col gap-xs">
-                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Nombre Completo</label>
-                            <input name="Name" class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Ej. Juan Pérez" type="text"/>
+                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Full Name</label>
+                            <input name="Name" class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="e.g. John Doe" type="text"/>
                         </div>
                     </div>
                     
                     <div class="flex flex-col gap-xs">
-                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Correo Electrónico</label>
-                        <input name="Email" class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="juan.perez@email.com" type="email"/>
+                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Email Address</label>
+                        <input name="Email" class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="john.doe@email.com" type="email"/>
                     </div>
                     
                     <div class="flex flex-col gap-xs">
-                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Teléfono (Opcional)</label>
-                        <input name="Phone" class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="+34 000 000 000" type="tel"/>
+                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Phone (Optional)</label>
+                        <input name="Phone" class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="+1 000 000 0000" type="tel"/>
                     </div>
                     
                     <div class="pt-md border-t border-outline-variant">
                         <div class="flex items-center gap-sm">
                             <input class="w-5 h-5 rounded text-primary focus:ring-primary border-outline-variant" id="loyalty" type="checkbox"/>
-                            <label class="font-body-md text-on-surface-variant" for="loyalty">Inscribir en programa de lealtad (CineRewards)</label>
+                            <label class="font-body-md text-on-surface-variant" for="loyalty">Enroll in loyalty program (CineRewards)</label>
                         </div>
                     </div>
                     
@@ -112,10 +112,10 @@
                 
                 <div id="form-existing" class="hidden space-y-lg">
                     <div class="flex flex-col gap-xs">
-                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Correo Electrónico del Cliente</label>
-                        <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none" placeholder="correo@ejemplo.com" type="email" name="ExistingEmail" />
+                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Customer Email</label>
+                        <input class="p-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary outline-none" placeholder="email@example.com" type="email" name="ExistingEmail" />
                     </div>
-                    <p class="text-sm text-on-surface-variant">Ingrese el correo registrado para buscar el perfil del cliente.</p>
+                    <p class="text-sm text-on-surface-variant">Enter the registered email to find the customer's profile.</p>
                 </div>
             </div>
         </div>

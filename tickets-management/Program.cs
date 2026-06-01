@@ -10,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using tickets_management.Data;
 using tickets_management.Models;
 using tickets_management.Validators;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +33,8 @@ builder.Services.AddSession(options =>
 
 var SalesConnectionString = builder.Configuration.GetConnectionString("DbSalesConnection");
 builder.Services.AddDbContext<MySqlDbContext>(options =>
-    options.UseMySql(SalesConnectionString, ServerVersion.AutoDetect(SalesConnectionString)));
+    options.UseMySql(SalesConnectionString, ServerVersion.AutoDetect(SalesConnectionString))
+           .UseSnakeCaseNamingConvention());
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {   
@@ -72,6 +75,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 });
     
 var app = builder.Build();
+
+var defaultCulture = new CultureInfo("es-CO");
+defaultCulture.NumberFormat.CurrencyDecimalDigits = 0; // Forzar sin decimales
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(culture: defaultCulture, uiCulture: new CultureInfo("en-US")),
+    SupportedCultures = new List<CultureInfo> { defaultCulture },
+    SupportedUICultures = new List<CultureInfo> { new CultureInfo("en-US") }
+};
+app.UseRequestLocalization(localizationOptions);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
