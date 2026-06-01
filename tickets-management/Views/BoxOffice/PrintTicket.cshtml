@@ -128,41 +128,57 @@
 </head>
 <body>
     <div class="print-bar">
-        <button type="button" onclick="window.print()">Imprimir tickets</button>
-        <button type="button" class="volver-btn" onclick="window.location.href='/BoxOffice/Pos'">Volver al POS</button>
+        <button type="button" onclick="window.print()">Print Tickets</button>
+        <button type="button" class="volver-btn" onclick="window.location.href='/BoxOffice/Pos'">Back to POS</button>
     </div>
 
     @foreach (var t in tickets)
     {
         <div class="ticket">
             <div class="brand">Teatro Central</div>
-            <div class="subtitle">Boleto de entrada</div>
+            <div class="subtitle">Admission Ticket</div>
             <div class="stars">★ ★ ★ ★ ★</div>
 
             <hr class="rule" />
-            <div class="admit">Admite uno</div>
+            <div class="admit">Admit One</div>
             <hr class="dashed" />
 
-            <div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@t.Code" alt="@t.Code" /></div>
+            @{
+                var ticketDtos = ViewData["TicketDtos"] as List<tickets_management.Models.ViewModels.BoughtTicketDto>;
+                var dto = ticketDtos?.FirstOrDefault(d => d.TicketCode == t.Code);
+                var qrData = t.Code;
+                if (dto != null) {
+                    var dict = new {
+                        user = dto.UserId,
+                        seat = dto.Seat,
+                        date = dto.EventDate.ToString("yyyy-MM-dd"),
+                        event_id = dto.EventId,
+                        venue_id = dto.VenueId,
+                        status = dto.Status.ToString()
+                    };
+                    qrData = System.Text.Json.JsonSerializer.Serialize(dict);
+                }
+            }
+            <div class="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@System.Net.WebUtility.UrlEncode(qrData)" alt="@t.Code" /></div>
             <div class="code">@t.Code</div>
 
             <hr class="dashed" />
             <div class="meta">
-                <div class="row"><span class="label">Evento</span><span class="val">@eventName</span></div>
-                <div class="row"><span class="label">Fecha</span><span class="val">@date</span></div>
-                <div class="row"><span class="label">Hora</span><span class="val">@hourAt</span></div>
+                <div class="row"><span class="label">Event</span><span class="val">@eventName</span></div>
+                <div class="row"><span class="label">Date</span><span class="val">@date</span></div>
+                <div class="row"><span class="label">Time</span><span class="val">@hourAt</span></div>
                 @if (!string.IsNullOrWhiteSpace(venue))
                 {
-                    <div class="row"><span class="label">Sala</span><span class="val">@venue</span></div>
+                    <div class="row"><span class="label">Venue</span><span class="val">@venue</span></div>
                 }
-                <div class="row"><span class="label">Asiento</span><span class="val">@t.Seat</span></div>
-                <div class="row"><span class="label">Orden</span><span class="val">#@orderNumber</span></div>
+                <div class="row"><span class="label">Seat</span><span class="val">@t.Seat</span></div>
+                <div class="row"><span class="label">Order</span><span class="val">#@orderNumber</span></div>
             </div>
 
             <hr class="rule" />
             <div class="footer">
-                Presente este código en la entrada.<br />
-                Válido solo si la orden está pagada.
+                Present this code at the entrance.<br />
+                Valid only if the order is paid.
             </div>
         </div>
     }
