@@ -151,6 +151,10 @@ namespace tickets_management.Controllers
         public async Task<IActionResult> PersistOrder(string orderData)
         {
             var username = HttpContext.Session.GetString("Username");
+            var token    = HttpContext.Session.GetString("JWToken");
+
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(username))
+                return RedirectToAction("Login");
 
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             var order   = JsonSerializer.Deserialize<CurrentOrder>(orderData, options);
@@ -194,6 +198,21 @@ namespace tickets_management.Controllers
             var tempOrder = await _orderService.GetOrderAsync(username);
             if (tempOrder != null)
             {
+                using var salesConnCheck = _dbConnectionFactory.GetSalesConnection();
+                var selectedSeatsList = tempOrder.SelectedSeats.Select(s => $"{s.Row}-{s.SeatNumber}").ToList();
+                
+                if (selectedSeatsList.Any())
+                {
+                    var checkQuery = @"SELECT seat FROM tickets WHERE event_id = @EventId AND seat IN @Seats AND status IN ('Pending', 'Scanned', 'Active')";
+                    var alreadySold = await salesConnCheck.QueryAsync<string>(checkQuery, new { EventId = tempOrder.EventId, Seats = selectedSeatsList });
+
+                    if (alreadySold.Any())
+                    {
+                        TempData["OrderError"] = $"Lo sentimos, los siguientes asientos acaban de ser vendidos a otra persona: {string.Join(", ", alreadySold)}";
+                        return RedirectToAction("Pos");
+                    }
+                }
+
                 var savedOrder = await _orderService.SaveOrderAsync(tempOrder);
 
                 // Insert User in db_public.users 
@@ -219,7 +238,7 @@ namespace tickets_management.Controllers
                     {
                         using var salesConn = _dbConnectionFactory.GetSalesConnection();
                         var queryTicket = @"INSERT INTO tickets (order_item_id, event_id, seat, ticket_code, status, created_at, updated_at) 
-                                            VALUES (@OrderItemId, @EventId, @Seat, @TicketCode, 'Active', NOW(), NOW())";
+                                            VALUES (@OrderItemId, @EventId, @Seat, @TicketCode, 'Pending', NOW(), NOW())";
                         
                         var itemsList = savedOrder.Items.ToList();
                         for (int i = 0; i < tempOrder.SelectedSeats.Count && i < itemsList.Count; i++)
@@ -233,7 +252,10 @@ namespace tickets_management.Controllers
                             await salesConn.ExecuteAsync(queryTicket, new { OrderItemId = orderItem.Id, EventId = orderItem.EventId, Seat = seatStr, TicketCode = ticketCode });
                         }
                     }
-                    catch { }
+                    catch (Exception ex) 
+                    { 
+                        Console.WriteLine("TICKET INSERT ERROR: " + ex);
+                    }
                 }
 
                 await _orderService.ClearOrderAsync(username);
@@ -267,7 +289,140 @@ namespace tickets_management.Controllers
             ViewData["HourAt"] = hourAt;
             ViewData["Tickets"] = tickets;
 
+            // Fetch full ticket info for QR codes
+            var ticketCodes = new List<string>();
+            if (!string.IsNullOrEmpty(tickets))
+            {
+                foreach (var t in tickets.Split(','))
+                {
+                    var parts = t.Split('|');
+                    if (parts.Length > 0) ticketCodes.Add(parts[0]);
+                }
+            }
+            
+            var ticketDtos = new List<tickets_management.Models.ViewModels.BoughtTicketDto>();
+            try
+            {
+                using var conn = _dbConnectionFactory.GetSalesConnection();
+                var query = @"
+                    SELECT 
+                        o.customer_id AS UserId,
+                        t.seat AS Seat,
+                        oi.price_ticket AS Price,
+                        e.StartDate AS EventDate,
+                        e.Id AS EventId,
+                        e.VenueId AS VenueId,
+                        t.status AS DbStatus,
+                        t.ticket_code AS TicketCode
+                    FROM db_sales.tickets t
+                    INNER JOIN db_sales.order_items oi ON t.order_item_id = oi.id
+                    INNER JOIN db_sales.orders o ON oi.order_id = o.id
+                    INNER JOIN db_catalog.Events e ON t.event_id = e.Id
+                    WHERE t.ticket_code IN @TicketCodes";
+
+                if (ticketCodes.Any())
+                {
+                    ticketDtos = (await conn.QueryAsync<tickets_management.Models.ViewModels.BoughtTicketDto>(query, new { TicketCodes = ticketCodes })).ToList();
+                }
+            }
+            catch (Exception) { /* Ignored for view rendering safety */ }
+
+            ViewData["TicketDtos"] = ticketDtos;
+
             return View();
+        }
+
+        [HttpGet("api/tickets/bought")]
+        public async Task<IActionResult> GetBoughtTickets()
+        {
+            try
+            {
+                using var conn = _dbConnectionFactory.GetSalesConnection();
+                var query = @"
+                    SELECT 
+                        o.customer_id AS UserId,
+                        t.seat AS Seat,
+                        oi.price_ticket AS Price,
+                        e.StartDate AS EventDate,
+                        e.Id AS EventId,
+                        e.VenueId AS VenueId,
+                        t.status AS DbStatus,
+                        t.ticket_code AS TicketCode
+                    FROM db_sales.tickets t
+                    INNER JOIN db_sales.order_items oi ON t.order_item_id = oi.id
+                    INNER JOIN db_sales.orders o ON oi.order_id = o.id
+                    INNER JOIN db_catalog.Events e ON t.event_id = e.Id";
+
+                var tickets = await conn.QueryAsync<tickets_management.Models.ViewModels.BoughtTicketDto>(query);
+                return Ok(tickets);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error retrieving bought tickets", Error = ex.Message });
+            }
+        }
+
+        [HttpGet("api/tickets/bought/{ticketCode}")]
+        public async Task<IActionResult> GetBoughtTicket(string ticketCode)
+        {
+            try
+            {
+                using var conn = _dbConnectionFactory.GetSalesConnection();
+                var query = @"
+                    SELECT 
+                        o.customer_id AS UserId,
+                        t.seat AS Seat,
+                        oi.price_ticket AS Price,
+                        e.StartDate AS EventDate,
+                        e.Id AS EventId,
+                        e.VenueId AS VenueId,
+                        t.status AS DbStatus,
+                        t.ticket_code AS TicketCode
+                    FROM db_sales.tickets t
+                    INNER JOIN db_sales.order_items oi ON t.order_item_id = oi.id
+                    INNER JOIN db_sales.orders o ON oi.order_id = o.id
+                    INNER JOIN db_catalog.Events e ON t.event_id = e.Id
+                    WHERE t.ticket_code = @TicketCode";
+
+                var ticket = await conn.QueryFirstOrDefaultAsync<tickets_management.Models.ViewModels.BoughtTicketDto>(query, new { TicketCode = ticketCode });
+                
+                if (ticket == null)
+                    return NotFound(new { Message = "Ticket not found" });
+
+                return Ok(ticket);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error retrieving ticket", Error = ex.Message });
+            }
+        }
+
+        [HttpPost("api/tickets/scan/{ticketCode}")]
+        public async Task<IActionResult> ScanTicket(string ticketCode)
+        {
+            try
+            {
+                using var conn = _dbConnectionFactory.GetSalesConnection();
+                // Find ticket
+                var checkQuery = "SELECT status FROM tickets WHERE ticket_code = @TicketCode";
+                var currentStatus = await conn.QueryFirstOrDefaultAsync<string>(checkQuery, new { TicketCode = ticketCode });
+
+                if (string.IsNullOrEmpty(currentStatus))
+                    return NotFound(new { Message = "Ticket not found" });
+
+                if (currentStatus.Equals("Scanned", StringComparison.OrdinalIgnoreCase))
+                    return BadRequest(new { Message = "Ticket has already been scanned!" });
+
+                // Update to Scanned
+                var updateQuery = "UPDATE tickets SET status = 'Scanned', updated_at = NOW() WHERE ticket_code = @TicketCode";
+                await conn.ExecuteAsync(updateQuery, new { TicketCode = ticketCode });
+
+                return Ok(new { Message = "Ticket successfully scanned", TicketCode = ticketCode, Status = "Scanned" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error scanning ticket", Error = ex.Message });
+            }
         }
 
         public IActionResult Seats() => View();

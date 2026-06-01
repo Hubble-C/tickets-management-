@@ -59,7 +59,7 @@ public class EventService : IEventService
     public async Task<IEnumerable<string>> GetOccupiedSeatsByEventAsync(int eventId)
     {
         using var connection = _dbConnectionFactory.GetSalesConnection();
-        var sql = @"SELECT seat FROM tickets WHERE event_id = @EventId AND status = 'Active'";
+        var sql = @"SELECT seat FROM tickets WHERE event_id = @EventId AND status IN ('Pending', 'Scanned', 'Active')";
         return await connection.QueryAsync<string>(sql, new { EventId = eventId });
     }
 }
