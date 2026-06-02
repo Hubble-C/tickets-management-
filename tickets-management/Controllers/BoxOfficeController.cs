@@ -20,13 +20,15 @@ namespace tickets_management.Controllers
         private readonly IOrderService _orderService;
         private readonly IEventService _eventService;
         private readonly IDbConnectionFactory _dbConnectionFactory;
+        private readonly IN8nService _n8nService;
 
-        public BoxOfficeController(ILogin login, IOrderService orderService, IEventService eventService, IDbConnectionFactory dbConnectionFactory)
+        public BoxOfficeController(ILogin login, IOrderService orderService, IEventService eventService, IDbConnectionFactory dbConnectionFactory, IN8nService n8nService)
         {
             _orderService = orderService;
             _login = login;
             _eventService = eventService;
             _dbConnectionFactory = dbConnectionFactory;
+            _n8nService = n8nService;
         }
 
         [HttpGet]
@@ -266,7 +268,66 @@ namespace tickets_management.Controllers
 
                 await _orderService.ClearOrderAsync(username);
 
-                // TempData["OrderSuccess"] = $"Factura generada. Tickets: {string.Join(", ", generatedTickets)}";
+                // ── n8n: disparar correo al comprador ────────────────────────────────
+                var finalEmailForN8n = !string.IsNullOrEmpty(Email) ? Email : ExistingEmail;
+                var allEvents    = await _eventService.GetActiveEventsAsync();
+                var currentEvent = allEvents.FirstOrDefault(e => e.Id == int.Parse(tempOrder.EventId));
+                if (!string.IsNullOrEmpty(finalEmailForN8n) && savedOrder != null && currentEvent != null)
+                {
+                    var n8nTickets = new List<N8nTicket>();
+
+                    for (int i = 0; i < generatedTickets.Count; i++)
+                    {
+                        var parts    = generatedTickets[i].Split('|');
+                        var code     = parts[0];
+                        var seatStr  = parts.Length > 1 ? parts[1] : string.Empty;
+                        var seat     = i < tempOrder.SelectedSeats.Count ? tempOrder.SelectedSeats[i] : null;
+                        var isVip    = seat?.Zone == LabelZone.VIP;
+                        var price    = seat?.Price ?? 0;
+                        var ttName   = isVip ? "VIP" : "General";
+                        var emoji    = isVip ? "⭐" : "🎸";
+                        var section  = isVip ? "VIP Lounge + Bar" : "General Floor";
+                        var doors    = isVip ? "3:00 PM" : "4:00 PM";
+
+                        n8nTickets.Add(new N8nTicket
+                        {
+                            Type      = ttName,
+                            Emoji     = emoji,
+                            Code      = code,
+                            UnitPrice = price,
+                            Section   = section,
+                            DoorsOpen = doors
+                        });
+                    }
+
+                    var payload = new TicketPurchasePayload
+                    {
+                        Source   = "app_web",
+                        Customer = new N8nCustomer { Name = Name ?? string.Empty, Email = finalEmailForN8n },
+                        Order    = new N8nOrder
+                        {
+                            Id           = savedOrder.Id.ToString(),
+                            PurchaseDate = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                            Tickets      = n8nTickets
+                        },
+                        Invoice = new N8nInvoice
+                        {
+                            Nit           = savedOrder.Nit,
+                            PaymentMethod = TypePayment.ToString(),
+                            Status        = "Paid",
+                            Total         = tempOrder.Total
+                        },
+                        Event = new N8nEvent
+                        {
+                            Name  = currentEvent.Name,
+                            Date  = currentEvent.StartDate.ToString("MMM dd, yyyy"),
+                            Venue = currentEvent.VenueName ?? "Teatro Central"
+                        }
+                    };
+
+                    _ = Task.Run(() => _n8nService.SendTicketPurchaseNotificationAsync(payload));
+                }
+                // ────────────────────────────────────────────────────────────────────
 
                 return RedirectToAction("PrintTicket", new { 
                     orderNumber = savedOrder.Id.ToString(),

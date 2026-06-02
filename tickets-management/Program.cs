@@ -22,6 +22,7 @@ builder.Services.AddTransient<IPasswordHasher<AspNetUsers>, PasswordHasher<AspNe
 builder.Services.AddSingleton<IOrderService, OrderService>();
 builder.Services.AddTransient<IDbConnectionFactory, DbConnectionFactory>();
 builder.Services.AddTransient<LoginValidator>();
+builder.Services.AddHttpClient<IN8nService, N8nService>();
 builder.Services.AddTransient<IEventService, EventService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
