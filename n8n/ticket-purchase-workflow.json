@@ -1,0 +1,155 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ticket-purchase",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [688, 192],
+      "id": "c088426a-8c9c-402d-bf9c-3d5d5c81fd53",
+      "name": "Webhook",
+      "webhookId": "dbec7f05-3e33-45fc-8f75-39c16061d2da",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "vXQkjQrkGFoYoNuQ",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.body;\n\nconst customer = input.customer;\nconst order = input.order;\nconst invoice = input.invoice;\nconst event = input.event;\n\nconst purchaseDate = new Date(order.purchase_date).toLocaleDateString('en-US', {\n  year: 'numeric',\n  month: 'short',\n  day: 'numeric'\n});\n\nconst tickets = order.tickets.map(ticket => {\n  const qrPayload = JSON.stringify({\n    ticketCode: ticket.code,\n    user: customer.id,\n    seat: ticket.seat,\n    date: event.date,\n    event_id: event.id,\n    venue_id: event.venue_id,\n    status: ticket.status ?? 'Pending'\n  });\n\n  return {\n    ...ticket,\n    qr_data: qrPayload,\n    qr_url: `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrPayload)}`\n  };\n});\n\nconst ticketsSummary = Object.values(\n  tickets.reduce((acc, t) => {\n    if (!acc[t.type]) {\n      acc[t.type] = {\n        ...t,\n        qty: 0,\n        subtotal: 0\n      };\n    }\n\n    acc[t.type].qty++;\n    acc[t.type].subtotal += t.unit_price;\n\n    return acc;\n  }, {})\n);\n\nreturn [{\n  json: {\n    customer,\n    event,\n    order: {\n      ...order,\n      purchase_date: purchaseDate,\n    },\n    invoice: {\n      ...invoice,\n      total_formatted: `$${invoice.total.toFixed(2)}`,\n      status_label: invoice.status === 'Paid'\n        ? 'Paid ✅'\n        : invoice.status,\n    },\n    tickets,\n    ticketsSummary,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [928, 192],
+      "id": "3cdf1c8d-22e5-4fab-9c0d-46b8c2b386b5",
+      "name": "Prepare Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nconst {\n  customer,\n  order,\n  invoice,\n  event,\n  tickets,\n  ticketsSummary\n} = data;\n\nconst summaryRows = ticketsSummary.map(t => `\n<tr>\n  <td style=\"padding:12px;border-bottom:1px solid #e5e7eb;\">\n    ${t.emoji || '🎟️'} ${t.type}\n  </td>\n  <td style=\"padding:12px;border-bottom:1px solid #e5e7eb;text-align:center;\">\n    ${t.qty}\n  </td>\n  <td style=\"padding:12px;border-bottom:1px solid #e5e7eb;text-align:right;\">\n    $${t.subtotal.toFixed(2)}\n  </td>\n</tr>\n`).join('');\n\nconst ticketCards = tickets.map(t => `\n<div style=\"border:1px solid #d1d5db;border-radius:12px;padding:24px;margin-bottom:24px;background:#ffffff;\">\n\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n    <tr>\n      <td valign=\"top\" style=\"padding-right:20px;\">\n        <h2 style=\"margin:0 0 12px 0;color:#111827;font-size:22px;\">\n          ${event.name}\n        </h2>\n\n        <p style=\"margin:6px 0;color:#374151;\">\n          <strong>Ticket:</strong> ${t.type}\n        </p>\n\n        <p style=\"margin:6px 0;color:#374151;\">\n          <strong>Date:</strong> ${event.date}\n        </p>\n\n        <p style=\"margin:6px 0;color:#374151;\">\n          <strong>Venue:</strong> ${event.venue}\n        </p>\n\n        <p style=\"margin:6px 0;color:#374151;\">\n          <strong>Section:</strong> ${t.section}\n        </p>\n\n        <p style=\"margin:6px 0;color:#374151;\">\n          <strong>Doors Open:</strong> ${t.doors_open}\n        </p>\n\n        <p style=\"margin-top:18px;font-size:14px;color:#6b7280;\">\n          Ticket Code\n        </p>\n\n        <div style=\"display:inline-block;background:#111827;color:white;padding:10px 14px;border-radius:8px;font-family:monospace;font-size:16px;letter-spacing:2px;\">\n          ${t.code}\n        </div>\n      </td>\n\n      <td width=\"180\" valign=\"top\" align=\"center\">\n        <img\n          src=\"${t.qr_url}\"\n          width=\"150\"\n          height=\"150\"\n          style=\"display:block;border:8px solid #f3f4f6;border-radius:10px;\"\n        />\n\n        <p style=\"margin-top:10px;font-size:12px;color:#6b7280;\">\n          Scan at entrance\n        </p>\n      </td>\n    </tr>\n  </table>\n\n</div>\n`).join('');\n\nconst emailHtml = `\n<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>Ticket Purchase Confirmation</title>\n</head>\n<body style=\"margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;\">\n\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f3f4f6;padding:40px 0;\">\n<tr>\n<td align=\"center\">\n\n<table width=\"700\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:white;border-radius:14px;overflow:hidden;\">\n\n<tr>\n<td style=\"background:#111827;padding:40px;text-align:center;\">\n  <h1 style=\"margin:0;color:white;font-size:34px;\">\n    TicketZone\n  </h1>\n\n  <p style=\"margin-top:14px;color:#d1d5db;font-size:16px;\">\n    Your purchase has been confirmed\n  </p>\n</td>\n</tr>\n\n<tr>\n<td style=\"padding:40px;\">\n\n<p style=\"font-size:16px;color:#374151;line-height:1.7;\">\n  Hi <strong>${customer.name}</strong>,<br><br>\n  Thank you for your purchase. Attached to this email you will find your PDF ticket invoice.\n</p>\n\n<div style=\"margin-top:30px;background:#f9fafb;border-radius:12px;padding:24px;border:1px solid #e5e7eb;\">\n\n<h2 style=\"margin-top:0;color:#111827;font-size:22px;\">\n  Order Summary\n</h2>\n\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-top:20px;\">\n<tr>\n  <td style=\"padding:8px 0;color:#6b7280;\">Order ID</td>\n  <td align=\"right\" style=\"padding:8px 0;color:#111827;\">\n    #${order.id}\n  </td>\n</tr>\n\n<tr>\n  <td style=\"padding:8px 0;color:#6b7280;\">Purchase Date</td>\n  <td align=\"right\" style=\"padding:8px 0;color:#111827;\">\n    ${order.purchase_date}\n  </td>\n</tr>\n\n<tr>\n  <td style=\"padding:8px 0;color:#6b7280;\">Payment Method</td>\n  <td align=\"right\" style=\"padding:8px 0;color:#111827;\">\n    ${invoice.payment_method}\n  </td>\n</tr>\n\n<tr>\n  <td style=\"padding:8px 0;color:#6b7280;\">Status</td>\n  <td align=\"right\" style=\"padding:8px 0;color:#111827;\">\n    ${invoice.status_label}\n  </td>\n</tr>\n</table>\n\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-top:24px;border-collapse:collapse;\">\n<thead>\n<tr style=\"background:#111827;\">\n  <th align=\"left\" style=\"padding:12px;color:white;font-size:14px;\">\n    Ticket\n  </th>\n\n  <th align=\"center\" style=\"padding:12px;color:white;font-size:14px;\">\n    Qty\n  </th>\n\n  <th align=\"right\" style=\"padding:12px;color:white;font-size:14px;\">\n    Total\n  </th>\n</tr>\n</thead>\n<tbody>\n${summaryRows}\n</tbody>\n</table>\n\n<div style=\"margin-top:24px;text-align:right;\">\n  <span style=\"font-size:16px;color:#6b7280;\">\n    Total Paid:\n  </span>\n\n  <span style=\"font-size:28px;font-weight:bold;color:#111827;margin-left:10px;\">\n    ${invoice.total_formatted}\n  </span>\n</div>\n\n</div>\n\n<h2 style=\"margin-top:40px;margin-bottom:20px;color:#111827;\">\n  Your Tickets\n</h2>\n\n${ticketCards}\n\n<p style=\"margin-top:40px;color:#6b7280;font-size:14px;line-height:1.7;\">\n  If you need help, contact us at support@ticketzone.co\n</p>\n\n</td>\n</tr>\n\n<tr>\n<td style=\"background:#111827;padding:30px;text-align:center;\">\n  <p style=\"margin:0;color:#9ca3af;font-size:13px;\">\n    © 2026 TicketZone · Bogotá, Colombia\n  </p>\n</td>\n</tr>\n\n</table>\n\n</td>\n</tr>\n</table>\n\n</body>\n</html>\n`;\n\nreturn [{\n  json: {\n    ...data,\n    html: emailHtml\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1168, 192],
+      "id": "bb5f7d93-6f8a-403f-85e7-8d2ba9dd2ebb",
+      "name": "Generate HTML"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pdfshift.io/v3/convert/pdf",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"source\": {{ JSON.stringify($json.html) }},\n  \"landscape\": false,\n  \"use_print\": false,\n  \"format\": \"A4\",\n  \"margin\": \"20px\",\n  \"delay\": 2000\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1408, 192],
+      "id": "70903297-3c20-49e3-9a6c-1993d6d4571b",
+      "name": "Generate PDF",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "vXQkjQrkGFoYoNuQ",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nconst data = item.json;\n\nif (!item.binary || !item.binary.data) {\n  throw new Error('PDF binary file not received from PDFShift');\n}\n\nconst orderId = data.order?.id || 'unknown';\n\nreturn [{\n  json: {\n    customer: data.customer,\n    order: data.order,\n    invoice: data.invoice,\n    event: data.event,\n    html: data.html,\n  },\n\n  binary: {\n    attachment: {\n      ...item.binary.data,\n      fileName: `ticket-order-${orderId}.pdf`\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1648, 192],
+      "id": "a9af8b7e-4240-4add-a58f-d8dba4fc5182",
+      "name": "Prepare Attachment"
+    },
+    {
+      "parameters": {
+        "fromEmail": "bladucar@gmail.com",
+        "toEmail": "={{ $json.customer.email }}",
+        "subject": "={{ 'Your order #' + $json.order.id + ' is confirmed – ' + $json.event.name }}",
+        "html": "={{ $json.html }}",
+        "options": {
+          "attachments": "=attachment"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1888, 192],
+      "id": "c18cd03c-cf88-4a4a-86c6-5394d0167e8f",
+      "name": "Send Email",
+      "webhookId": "dd1b1c58-1f7d-4a0f-83b5-d343bd516e49",
+      "credentials": {
+        "smtp": {
+          "id": "Oy1Ev4CXTAzafZ9y",
+          "name": "SMTP Gmail Bladucar"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\",\n  \"order_id\": \"={{ $json.order.id }}\",\n  \"email_sent_to\": \"={{ $json.customer.email }}\",\n  \"timestamp\": \"={{ new Date().toISOString() }}\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [2128, 192],
+      "id": "8fc5314b-9cbe-4588-b536-a951de8af6f9",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Prepare Data", "type": "main", "index": 0}]]
+    },
+    "Prepare Data": {
+      "main": [[{"node": "Generate HTML", "type": "main", "index": 0}]]
+    },
+    "Generate HTML": {
+      "main": [[{"node": "Generate PDF", "type": "main", "index": 0}]]
+    },
+    "Generate PDF": {
+      "main": [[{"node": "Prepare Attachment", "type": "main", "index": 0}]]
+    },
+    "Prepare Attachment": {
+      "main": [[{"node": "Send Email", "type": "main", "index": 0}]]
+    },
+    "Send Email": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a2d3fe426920260b3e8c891f4973db361bf0e589356c5e04402cd9dbfe163dd1"
+  }
+}
