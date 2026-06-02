@@ -149,6 +149,7 @@
                 var qrData = t.Code;
                 if (dto != null) {
                     var dict = new {
+                        ticketCode = t.Code,
                         user = dto.UserId,
                         seat = dto.Seat,
                         date = dto.EventDate.ToString("yyyy-MM-dd"),
