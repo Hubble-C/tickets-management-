@@ -8,6 +8,12 @@ using tickets_management.Services.Interfaces;
 using Dapper;
 namespace tickets_management.Controllers
 {
+    public class ValidateTicketRequest
+    {
+        public string TicketCode { get; set; }
+        public int EventId { get; set; }
+    }
+
     public class BoxOfficeController : Controller
     {
         private readonly ILogin _login;
@@ -422,6 +428,76 @@ namespace tickets_management.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { Message = "Error scanning ticket", Error = ex.Message });
+            }
+        }
+
+        [HttpGet("api/events/active")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetActiveEventsApi()
+        {
+            var events = await _eventService.GetActiveEventsAsync();
+            return Ok(events);
+        }
+
+        [HttpPost("api/tickets/validate")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ValidateTicketApi([FromBody] ValidateTicketRequest request)
+        {
+            try
+            {
+                using var conn = _dbConnectionFactory.GetSalesConnection();
+                
+                var query = @"
+                    SELECT 
+                        t.ticket_code AS TicketCode,
+                        t.status AS Status,
+                        t.event_id AS EventId,
+                        t.seat AS Seat,
+                        e.StartDate AS EventDate
+                    FROM db_sales.tickets t
+                    INNER JOIN db_catalog.Events e ON t.event_id = e.Id
+                    WHERE t.ticket_code = @Code OR t.order_item_id IN (SELECT id FROM db_sales.order_items WHERE order_id = @OrderId)
+                ";
+                
+                int.TryParse(request.TicketCode, out int orderId);
+                
+                var tickets = await conn.QueryAsync<dynamic>(query, new { Code = request.TicketCode, OrderId = orderId > 0 ? orderId : -1 });
+                var ticketList = tickets.ToList();
+
+                if (!ticketList.Any())
+                    return Ok(new { Result = "NotFound", Message = "Ticket or Order not found", TicketCode = request.TicketCode });
+
+                var eventTickets = ticketList.Where(t => t.EventId == request.EventId).ToList();
+                
+                if (!eventTickets.Any())
+                    return Ok(new { Result = "InvalidState", Message = "Ticket does not belong to this Event/Venue", TicketCode = request.TicketCode });
+
+                var eventDate = (DateTime)eventTickets.First().EventDate;
+                if (eventDate.Date < DateTime.Today)
+                    return Ok(new { Result = "Expired", Message = "Event has already expired", TicketCode = request.TicketCode });
+                    
+                var pendingTickets = eventTickets.Where(t => t.Status == "Pending").ToList();
+                
+                if (!pendingTickets.Any())
+                    return Ok(new { Result = "AlreadyUsed", Message = "Ticket(s) already scanned", TicketCode = request.TicketCode });
+
+                var codesToUpdate = pendingTickets.Select(t => (string)t.TicketCode).ToList();
+                var updateQuery = "UPDATE db_sales.tickets SET status = 'Scanned', updated_at = NOW() WHERE ticket_code IN @Codes";
+                await conn.ExecuteAsync(updateQuery, new { Codes = codesToUpdate });
+
+                var seats = string.Join(", ", pendingTickets.Select(t => t.Seat));
+                
+                return Ok(new { 
+                    Result = "Granted", 
+                    Message = "Valid", 
+                    TicketCode = request.TicketCode,
+                    Seat = seats,
+                    EventId = request.EventId
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Result = "Error", Message = ex.Message });
             }
         }
 

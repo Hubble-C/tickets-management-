@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Localization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.Services.AddTransient<ILogin, LoginService>();
 builder.Services.AddTransient<IPasswordHasher<AspNetUsers>, PasswordHasher<AspNetUsers>>();
 builder.Services.AddSingleton<IOrderService, OrderService>();

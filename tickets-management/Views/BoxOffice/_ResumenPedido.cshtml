@@ -57,7 +57,7 @@
         <h3 class="font-headline-md text-headline-md text-on-surface mb-lg font-bold">Payment Method</h3>
         <input type="hidden" name="TypePayment" id="selected-payment-method" value="@Model.TypePayment">
 
-        <div class="grid grid-cols-3 gap-md mb-xl">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-md mb-xl">
             @{
             var isCash = Model.TypePayment == TypePayment.Cash;
             var cashClass = isCash ? "border-2 border-primary bg-secondary-container/20" : "border border-outline-variant hover:border-primary";
