@@ -467,14 +467,16 @@ namespace tickets_management.Controllers
                 if (!ticketList.Any())
                     return Ok(new { Result = "NotFound", Message = "Ticket or Order not found", TicketCode = request.TicketCode });
 
-                var eventTickets = ticketList.Where(t => t.EventId == request.EventId).ToList();
-                
+                var eventTickets = request.EventId > 0
+                    ? ticketList.Where(t => t.EventId == request.EventId).ToList()
+                    : ticketList;
+
                 if (!eventTickets.Any())
                     return Ok(new { Result = "InvalidState", Message = "Ticket does not belong to this Event/Venue", TicketCode = request.TicketCode });
 
                 var eventDate = (DateTime)eventTickets.First().EventDate;
                 if (eventDate.Date < DateTime.Today)
-                    return Ok(new { Result = "Expired", Message = "Event has already expired", TicketCode = request.TicketCode });
+                    return Ok(new { Result = "InvalidState", Message = "Event has already expired", TicketCode = request.TicketCode });
                     
                 var pendingTickets = eventTickets.Where(t => t.Status == "Pending").ToList();
                 
