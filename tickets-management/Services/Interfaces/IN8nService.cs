@@ -18,6 +18,7 @@ public class TicketPurchasePayload
 
 public class N8nCustomer
 {
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
 }
@@ -37,6 +38,8 @@ public class N8nTicket
     public decimal UnitPrice { get; set; }
     public string Section { get; set; } = string.Empty;
     public string DoorsOpen { get; set; } = string.Empty;
+    public string Seat { get; set; } = string.Empty;
+    public string Status { get; set; } = "Pending";
 }
 
 public class N8nInvoice
@@ -49,7 +52,9 @@ public class N8nInvoice
 
 public class N8nEvent
 {
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Date { get; set; } = string.Empty;
     public string Venue { get; set; } = string.Empty;
+    public int VenueId { get; set; }
 }

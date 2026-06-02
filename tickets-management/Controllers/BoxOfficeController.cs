@@ -296,14 +296,21 @@ namespace tickets_management.Controllers
                             Code      = code,
                             UnitPrice = price,
                             Section   = section,
-                            DoorsOpen = doors
+                            DoorsOpen = doors,
+                            Seat      = seatStr,
+                            Status    = "Pending"
                         });
                     }
 
                     var payload = new TicketPurchasePayload
                     {
                         Source   = "app_web",
-                        Customer = new N8nCustomer { Name = Name ?? string.Empty, Email = finalEmailForN8n },
+                        Customer = new N8nCustomer
+                        {
+                            Id    = savedOrder.CustomerId,
+                            Name  = Name ?? string.Empty,
+                            Email = finalEmailForN8n
+                        },
                         Order    = new N8nOrder
                         {
                             Id           = savedOrder.Id.ToString(),
@@ -319,9 +326,11 @@ namespace tickets_management.Controllers
                         },
                         Event = new N8nEvent
                         {
-                            Name  = currentEvent.Name,
-                            Date  = currentEvent.StartDate.ToString("MMM dd, yyyy"),
-                            Venue = currentEvent.VenueName ?? "Teatro Central"
+                            Id      = currentEvent.Id,
+                            Name    = currentEvent.Name,
+                            Date    = currentEvent.StartDate.ToString("MMM dd, yyyy"),
+                            Venue   = currentEvent.VenueName ?? "Teatro Central",
+                            VenueId = currentEvent.VenueId
                         }
                     };
 
